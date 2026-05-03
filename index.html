@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DataCoach — Analytics Mentor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--bg2:#13161e;--bg3:#1a1e28;--bg4:#222736;
+  --border:#2a2f3d;--border2:#343b4f;
+  --text:#e8eaf2;--text2:#8b90a4;--text3:#555c73;
+  --accent:#4f8ef7;
+  --green:#3ddc84;--purple:#b27ef7;--orange:#f7935e;--teal:#3dc9c9;--red:#f76060;
+  --font-head:'DM Serif Display',serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --r:10px;--r2:6px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);overflow:hidden}
+#app{display:flex;height:100vh}
+
+/* SIDEBAR */
+#sidebar{width:210px;min-width:210px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.sb-logo-title{font-family:var(--font-head);font-size:19px;color:var(--text)}
+.sb-logo-sub{font-size:9px;color:var(--text3);font-family:var(--font-mono);margin-top:3px;letter-spacing:.6px;text-transform:uppercase}
+.sb-sec{padding:10px 10px 4px;font-size:9px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.8px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:var(--r2);margin:1px 6px;cursor:pointer;font-size:12.5px;color:var(--text2);transition:all .15s;border:1px solid transparent}
+.sb-item:hover{background:var(--bg3);color:var(--text)}
+.sb-item.active{background:var(--bg4);color:var(--text);border-color:var(--border2)}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-div{height:1px;background:var(--border);margin:8px 12px}
+.sb-bottom{margin-top:auto;padding:12px 10px;border-top:1px solid var(--border)}
+.mode-btn{width:100%;padding:7px 11px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r2);color:var(--text2);font-size:12px;font-family:var(--font-body);cursor:pointer;text-align:left;margin-bottom:5px;transition:all .15s;display:flex;align-items:center;gap:8px}
+.mode-btn:hover{background:var(--bg3);color:var(--text)}
+.mode-btn.on{border-color:var(--accent);color:var(--accent)}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+#topbar{display:flex;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+#tb-title{font-size:13.5px;font-weight:500;color:var(--text)}
+#tb-sub{font-size:10px;color:var(--text3);font-family:var(--font-mono)}
+.theme-pill{margin-left:auto;padding:3px 10px;border-radius:20px;font-size:9px;font-family:var(--font-mono);border:1px solid;font-weight:500;flex-shrink:0}
+#timer{font-family:var(--font-mono);font-size:11px;padding:3px 9px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);color:var(--orange)}
+
+/* CHAT AREA */
+#chat{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+#chat::-webkit-scrollbar{width:3px}
+#chat::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* WELCOME */
+#welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;text-align:center;flex:1}
+.w-emoji{font-size:40px;margin-bottom:14px;display:block}
+.w-title{font-family:var(--font-head);font-size:26px;color:var(--text);margin-bottom:8px}
+.w-sub{font-size:13px;color:var(--text2);max-width:400px;line-height:1.7;margin-bottom:24px}
+.w-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:520px;margin-bottom:20px}
+.w-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;cursor:pointer;transition:all .2s;text-align:left}
+.w-card:hover{background:var(--bg4);border-color:var(--border2);transform:translateY(-2px)}
+.w-card-icon{font-size:18px;margin-bottom:7px;display:block}
+.w-card-title{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:3px}
+.w-card-sub{font-size:10.5px;color:var(--text3);line-height:1.4}
+.w-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:480px}
+.w-chip{padding:5px 12px;border-radius:20px;font-size:10.5px;border:1px solid;cursor:pointer;transition:opacity .15s;font-family:var(--font-mono)}
+.w-chip:hover{opacity:.7}
+
+/* MESSAGES */
+#msgs{padding:16px 20px;display:flex;flex-direction:column;gap:16px}
+.msg{display:flex;gap:10px;animation:fu .2s ease}
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.msg-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:2px}
+.msg-u .msg-av{background:#2d5cbf;color:#fff}
+.msg-ai .msg-av{background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-size:9px}
+.msg-bub{flex:1;min-width:0}
+.msg-name{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-bottom:4px}
+.msg-body{font-size:13.5px;line-height:1.75;color:var(--text)}
+.msg-u .msg-body{color:var(--text2)}
+.msg-body h2{font-size:14px;font-weight:600;color:var(--text);margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.msg-body h3{font-size:13px;font-weight:600;color:var(--text);margin:10px 0 5px}
+.msg-body p{margin-bottom:8px}
+.msg-body ul{margin:5px 0 8px 18px}
+.msg-body li{margin-bottom:3px}
+.msg-body strong{font-weight:600;color:var(--text)}
+.msg-body pre{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;overflow-x:auto;margin:10px 0;position:relative}
+.msg-body pre::before{content:attr(data-lang);position:absolute;top:6px;right:10px;font-size:9px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase}
+.msg-body code{font-family:var(--font-mono);font-size:12px;color:#a8d8a8}
+.msg-body :not(pre)>code{background:var(--bg4);padding:1px 5px;border-radius:3px;color:var(--teal);font-size:12px}
+.tip-box{background:var(--bg3);border-left:3px solid var(--accent);border-radius:0 var(--r2) var(--r2) 0;padding:10px 13px;margin:10px 0;font-size:12.5px;line-height:1.6}
+.tip-box.biz{border-left-color:var(--green)}
+.tip-box.warn{border-left-color:var(--orange)}
+.res-link{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);font-size:11px;color:var(--accent);text-decoration:none;margin:3px 2px;font-family:var(--font-mono);transition:all .15s}
+.res-link:hover{background:var(--bg3);border-color:var(--accent)}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-family:var(--font-mono);margin:2px}
+
+/* MCQ */
+.mcq-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:4px}
+.mcq-q{font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px;line-height:1.5}
+.mcq-num{font-family:var(--font-mono);font-size:10px;margin-right:6px}
+.mcq-opt{display:flex;align-items:flex-start;gap:8px;padding:8px 11px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r2);margin:4px 0;cursor:pointer;transition:all .15s;font-size:12.5px;line-height:1.5}
+.mcq-opt:hover:not(.locked){background:var(--bg3);border-color:var(--border2)}
+.mcq-opt.correct{background:#0a2118;border-color:var(--green);color:var(--green)}
+.mcq-opt.wrong{background:#220a0a;border-color:var(--red);color:var(--red)}
+.mcq-opt.locked{cursor:default}
+.opt-l{font-family:var(--font-mono);font-size:10px;color:var(--text3);min-width:14px;margin-top:1px;flex-shrink:0}
+.exp-box{display:none;font-size:12px;color:var(--text2);margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:var(--r2);border-left:2px solid var(--accent);line-height:1.6}
+
+/* SCORECARD */
+.score-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.score-num{font-size:30px;font-weight:600;font-family:var(--font-mono)}
+.score-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:8px 0}
+.score-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.path-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.path-item:last-child{border-bottom:none}
+
+/* INPUT */
+#input-area{padding:12px 20px 14px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.quick-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+.q-chip{padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--text2);cursor:pointer;transition:all .15s}
+.q-chip:hover{background:var(--bg4);color:var(--text);border-color:var(--border2)}
+#inp-row{display:flex;gap:8px;align-items:flex-end}
+#inp{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;color:var(--text);font-family:var(--font-body);font-size:13.5px;resize:none;min-height:40px;max-height:110px;outline:none;transition:border-color .15s;line-height:1.5}
+#inp:focus{border-color:var(--border2)}
+#inp::placeholder{color:var(--text3)}
+#send-btn{width:38px;height:38px;background:var(--accent);border:none;border-radius:var(--r2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+#send-btn:hover{background:#3d7be0}
+.arr{width:0;height:0;border-left:7px solid white;border-top:4px solid transparent;border-bottom:4px solid transparent;margin-left:2px}
+.typing{display:flex;gap:4px;align-items:center;padding:4px 0}
+.td{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:pulse 1.2s infinite}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,60%,100%{opacity:.3}30%{opacity:1}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-title">DataCoach</div>
+      <div class="sb-logo-sub">Analytics Mentor · RAG</div>
+    </div>
+    <div class="sb-sec">Topics</div>
+    <div class="sb-item active" data-topic="sql" onclick="setTopic(this)"><span class="sb-dot" style="background:#4f8ef7"></span>SQL</div>
+    <div class="sb-item" data-topic="python" onclick="setTopic(this)"><span class="sb-dot" style="background:#3ddc84"></span>Python</div>
+    <div class="sb-item" data-topic="statistics" onclick="setTopic(this)"><span class="sb-dot" style="background:#b27ef7"></span>Statistics</div>
+    <div class="sb-item" data-topic="visualization" onclick="setTopic(this)"><span class="sb-dot" style="background:#f7935e"></span>Viz &amp; BI</div>
+    <div class="sb-item" data-topic="workflow" onclick="setTopic(this)"><span class="sb-dot" style="background:#3dc9c9"></span>Workflow</div>
+    <div class="sb-div"></div>
+    <div class="sb-sec">Mode</div>
+    <div class="mode-btn on" id="mode-learn" onclick="setMode('learn')">📚 Learn &amp; Explore</div>
+    <div class="mode-btn" id="mode-test" onclick="setMode('test')">⏱ Take a Test</div>
+    <div class="mode-btn" id="mode-ask" onclick="setMode('ask')">💬 Quick Q&amp;A</div>
+    <div class="sb-bottom">
+      <div style="font-size:9px;color:var(--text3);font-family:var(--font-mono);margin-bottom:4px">📁 Powered by your Knowledge Base</div>
+      <div style="font-size:9px;color:var(--text3);font-family:var(--font-mono)">No API · Fully Offline</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="topbar">
+      <div>
+        <div id="tb-title">SQL — Learn &amp; Explore</div>
+        <div id="tb-sub">Data Analytics Coach</div>
+      </div>
+      <div id="timer" style="display:none">00:00</div>
+      <div class="theme-pill" id="theme-pill" style="border-color:#4f8ef7;color:#4f8ef7">SQL</div>
+    </div>
+
+    <div id="chat">
+      <div id="welcome">
+        <span class="w-emoji">📊</span>
+        <div class="w-title">Welcome to DataCoach</div>
+        <div class="w-sub">Your AI-powered Data Analytics Mentor. Learn SQL, Python, Statistics &amp; BI tools through guided lessons, live Q&amp;A, and timed quizzes — all from your own Knowledge Base.</div>
+        <div class="w-cards">
+          <div class="w-card" onclick="quickStart('learn')">
+            <span class="w-card-icon">📚</span>
+            <div class="w-card-title">Learn a Topic</div>
+            <div class="w-card-sub">Concepts, examples &amp; use cases</div>
+          </div>
+          <div class="w-card" onclick="quickStart('test')">
+            <span class="w-card-icon">⏱</span>
+            <div class="w-card-title">Take a Test</div>
+            <div class="w-card-sub">Timed MCQs with scorecard</div>
+          </div>
+          <div class="w-card" onclick="quickStart('ask')">
+            <span class="w-card-icon">💬</span>
+            <div class="w-card-title">Ask Anything</div>
+            <div class="w-card-sub">Instant answers from KB</div>
+          </div>
+        </div>
+        <div class="w-chips">
+          <span class="w-chip" style="border-color:#4f8ef7;color:#4f8ef7" onclick="sendQ('explain sql joins')">SQL JOINs</span>
+          <span class="w-chip" style="border-color:#3ddc84;color:#3ddc84" onclick="sendQ('pandas data cleaning')">Pandas</span>
+          <span class="w-chip" style="border-color:#b27ef7;color:#b27ef7" onclick="sendQ('hypothesis testing')">Hypothesis Testing</span>
+          <span class="w-chip" style="border-color:#f7935e;color:#f7935e" onclick="sendQ('power bi features')">Power BI</span>
+          <span class="w-chip" style="border-color:#3dc9c9;color:#3dc9c9" onclick="sendQ('end to end workflow')">Full Workflow</span>
+        </div>
+      </div>
+      <div id="msgs" style="display:none"></div>
+    </div>
+
+    <div id="input-area">
+      <div class="quick-chips" id="quick-chips">
+        <span class="q-chip" onclick="sendQ('sql window functions')">Window Functions</span>
+        <span class="q-chip" onclick="sendQ('cte sql')">SQL CTEs</span>
+        <span class="q-chip" onclick="sendQ('numpy arrays')">NumPy</span>
+        <span class="q-chip" onclick="sendQ('standard deviation mean')">Std Dev</span>
+        <span class="q-chip" onclick="sendQ('tableau vs power bi')">Tableau vs BI</span>
+        <span class="q-chip" onclick="sendQ('resources links')">📎 Resources</span>
+      </div>
+      <div id="inp-row">
+        <textarea id="inp" placeholder="Ask a question, type 'test me' for a quiz, or click a chip above…" rows="1" onkeydown="handleKey(event)" oninput="autoR(this)"></textarea>
+        <button id="send-btn" onclick="sendMsg()"><div class="arr"></div></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  KNOWLEDGE BASE — from your uploaded KB file
+// ═══════════════════════════════════════════════
+const KB = {
+  SQL_JOINS: {
+    keywords: ['join','joins','inner join','left join','right join','full join','merge table','combine table','customer order','join table'],
+    color: '#4f8ef7',
+    title: '🔗 SQL Joins',
+    content: () => `
+<h2>SQL Joins</h2>
+<p>SQL Joins combine rows from multiple tables using a related column. They are the backbone of relational data analysis.</p>
+<h3>Types of Joins</h3>
+<ul>
+  <li><strong>INNER JOIN</strong> — Returns only matching rows from both tables</li>
+  <li><strong>LEFT JOIN</strong> — All rows from the left table + matched rows from the right</li>
+  <li><strong>RIGHT JOIN</strong> — All rows from the right table + matched rows from the left</li>
+  <li><strong>FULL JOIN</strong> — All rows from both tables (NULLs where no match)</li>
+</ul>
+<h3>Example — INNER JOIN</h3>
+<pre data-lang="sql"><code>SELECT customers.name, orders.amount
+FROM customers
+INNER JOIN orders
+  ON customers.id = orders.customer_id;</code></pre>
+<h3>Example — LEFT JOIN</h3>
+<pre data-lang="sql"><code>SELECT customers.name, orders.amount
+FROM customers
+LEFT JOIN orders
+  ON customers.id = orders.customer_id;
+-- Includes customers with NO orders (amount will be NULL)</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> Always use aliases to keep JOIN queries readable — <code>FROM customers c INNER JOIN orders o ON c.id = o.customer_id</code></div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Merging customer profiles with transaction records to perform behavioral analysis — e.g., which customers have placed orders in the last 30 days.</div>`,
+    quiz: [
+      {q:'Which JOIN returns only rows that have matches in BOTH tables?',opts:['LEFT JOIN','INNER JOIN','FULL JOIN','RIGHT JOIN'],ans:1,exp:'INNER JOIN returns only matching rows from both tables. Non-matching rows are excluded.'},
+      {q:'Which JOIN returns ALL rows from the left table, even if no match exists in the right?',opts:['INNER JOIN','RIGHT JOIN','LEFT JOIN','FULL JOIN'],ans:2,exp:'LEFT JOIN keeps all left table rows. Where no right match exists, NULL is returned.'},
+      {q:'What keyword links two tables in a JOIN clause?',opts:['WHERE','USING','ON','BY'],ans:2,exp:'The ON keyword specifies the condition that relates the two tables in a JOIN.'},
+      {q:'What does a FULL OUTER JOIN return?',opts:['Only matching rows','All left rows only','All right rows only','All rows from both tables'],ans:3,exp:'FULL JOIN returns all rows from both tables, with NULLs where there is no match.'},
+      {q:'Which clause is used to filter rows AFTER a JOIN operation?',opts:['ON','JOIN','WHERE','HAVING'],ans:2,exp:'WHERE filters rows after the JOIN has combined the tables.'}
+    ]
+  },
+  SQL_AGGREGATIONS: {
+    keywords: ['aggregation','aggregate','count','sum','avg','average','max','min','group by','kpi','revenue','salary','department'],
+    color: '#4f8ef7',
+    title: '📊 SQL Aggregations',
+    content: () => `
+<h2>SQL Aggregations</h2>
+<p>Aggregation functions compute a single value across multiple rows — essential for KPI calculations and summary reporting.</p>
+<h3>Core Aggregate Functions</h3>
+<ul>
+  <li><strong>COUNT()</strong> — Number of rows</li>
+  <li><strong>SUM()</strong> — Total of a numeric column</li>
+  <li><strong>AVG()</strong> — Average value</li>
+  <li><strong>MAX()</strong> — Highest value</li>
+  <li><strong>MIN()</strong> — Lowest value</li>
+</ul>
+<h3>Example — Average Salary by Department</h3>
+<pre data-lang="sql"><code>SELECT department, AVG(salary) AS avg_salary
+FROM employees
+GROUP BY department;</code></pre>
+<h3>Example — Sales KPIs</h3>
+<pre data-lang="sql"><code>SELECT region,
+       COUNT(order_id)   AS total_orders,
+       SUM(amount)       AS total_revenue,
+       AVG(amount)       AS avg_order_value
+FROM orders
+GROUP BY region
+HAVING SUM(amount) > 50000
+ORDER BY total_revenue DESC;</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> Use <code>HAVING</code> to filter <em>after</em> aggregation (like WHERE for groups). Use <code>WHERE</code> to filter <em>before</em> aggregation.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Calculating average revenue per region, total orders per product category, and monthly sales KPIs for executive dashboards.</div>`,
+    quiz: [
+      {q:'Which function counts the total number of rows in a table?',opts:['SUM()','AVG()','COUNT()','MAX()'],ans:2,exp:'COUNT() returns the number of rows. COUNT(*) counts all rows; COUNT(col) counts non-NULL values.'},
+      {q:'Which clause is used with aggregate functions to group results?',opts:['ORDER BY','WHERE','HAVING','GROUP BY'],ans:3,exp:'GROUP BY groups rows with the same values so aggregate functions can be applied per group.'},
+      {q:'How do you filter groups after aggregation?',opts:['WHERE','FILTER','HAVING','GROUP FILTER'],ans:2,exp:'HAVING filters after GROUP BY. WHERE cannot reference aggregate function results.'},
+      {q:'What does AVG(salary) return?',opts:['The highest salary','The total of all salaries','The number of salaries','The mean salary value'],ans:3,exp:'AVG() calculates the arithmetic mean — total sum divided by count of non-NULL values.'},
+      {q:'Which query finds the highest sales amount?',opts:['SELECT SUM(amount)','SELECT COUNT(amount)','SELECT MAX(amount)','SELECT TOP(amount)'],ans:2,exp:'MAX() returns the largest value in the specified column.'}
+    ]
+  },
+  SQL_CTE: {
+    keywords: ['cte','common table expression','with clause','temp result','temporary query','readability','subquery','named query'],
+    color: '#4f8ef7',
+    title: '📋 SQL CTEs',
+    content: () => `
+<h2>SQL Common Table Expressions (CTEs)</h2>
+<p>CTEs are temporary named result sets defined at the start of a query using the <code>WITH</code> keyword. They dramatically improve query readability.</p>
+<h3>Basic CTE Syntax</h3>
+<pre data-lang="sql"><code>WITH SalesCTE AS (
+    SELECT region, SUM(sales) AS total_sales
+    FROM orders
+    GROUP BY region
+)
+SELECT *
+FROM SalesCTE
+WHERE total_sales > 10000;</code></pre>
+<h3>Multiple CTEs</h3>
+<pre data-lang="sql"><code>WITH
+  TopRegions AS (
+    SELECT region, SUM(sales) AS total_sales
+    FROM orders GROUP BY region
+  ),
+  HighPerformers AS (
+    SELECT * FROM TopRegions
+    WHERE total_sales > 50000
+  )
+SELECT * FROM HighPerformers
+ORDER BY total_sales DESC;</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> CTEs can reference themselves for <strong>recursive queries</strong> — great for hierarchical data like org charts or category trees.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Breaking complex multi-step analytics queries into readable, named steps — e.g., computing customer lifetime value before applying a final ranking.</div>`,
+    quiz: [
+      {q:'What keyword is used to define a CTE?',opts:['FROM','CREATE','WITH','DEFINE'],ans:2,exp:'CTEs are defined using the WITH keyword followed by the CTE name and query in parentheses.'},
+      {q:'What is the main benefit of using a CTE?',opts:['Faster query execution','Permanent data storage','Improved query readability','Replaces all subqueries'],ans:2,exp:'CTEs primarily improve readability by naming complex subqueries and breaking queries into logical steps.'},
+      {q:'Can a single query contain multiple CTEs?',opts:['No, only one','Yes, separated by commas','Yes, but only two','Only in MySQL'],ans:1,exp:'Multiple CTEs can be chained in one WITH clause, separated by commas, each referencing the previous ones.'},
+      {q:'How long does a CTE persist in the database?',opts:['Until the session ends','Until you drop it','Only for the single query','24 hours'],ans:2,exp:'CTEs are temporary — they only exist for the duration of the single query they are defined in.'},
+      {q:'Which feature allows a CTE to reference itself?',opts:['Nested CTE','Looped CTE','Recursive CTE','Circular CTE'],ans:2,exp:'Recursive CTEs reference themselves and are used for hierarchical or iterative data processing.'}
+    ]
+  },
+  SQL_WINDOW: {
+    keywords: ['window function','window','rank','row_number','partition','over','running total','lag','lead','cohort','ranking'],
+    color: '#4f8ef7',
+    title: '🪟 SQL Window Functions',
+    content: () => `
+<h2>SQL Window Functions</h2>
+<p>Window functions perform calculations across a set of rows related to the current row — without collapsing rows like GROUP BY does.</p>
+<h3>RANK — Ranking by Salary</h3>
+<pre data-lang="sql"><code>SELECT name, salary,
+       RANK() OVER (ORDER BY salary DESC) AS rank
+FROM employees;</code></pre>
+<h3>Running Total</h3>
+<pre data-lang="sql"><code>SELECT date, sales,
+       SUM(sales) OVER (ORDER BY date) AS running_total
+FROM daily_sales;</code></pre>
+<h3>Partition by Department</h3>
+<pre data-lang="sql"><code>SELECT name, department, salary,
+       RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_rank
+FROM employees;</code></pre>
+<h3>Common Window Functions</h3>
+<ul>
+  <li><strong>RANK()</strong> — Rank with gaps on ties</li>
+  <li><strong>DENSE_RANK()</strong> — Rank without gaps</li>
+  <li><strong>ROW_NUMBER()</strong> — Unique sequential row number</li>
+  <li><strong>LAG() / LEAD()</strong> — Access previous / next row values</li>
+  <li><strong>SUM() OVER</strong> — Running totals</li>
+</ul>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> Use <code>PARTITION BY</code> inside OVER() to reset the window per group — like ranking within each department separately.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Computing running monthly revenue totals, ranking top-performing sales reps per region, and calculating month-over-month growth using LAG().</div>`,
+    quiz: [
+      {q:'What makes window functions different from GROUP BY aggregations?',opts:['They are faster','They do not collapse rows','They only work on numbers','They require CTEs'],ans:1,exp:'Window functions compute values across rows but keep all rows in the result — unlike GROUP BY which collapses rows.'},
+      {q:'Which keyword defines the window frame in a window function?',opts:['WHERE','GROUP BY','OVER','PARTITION'],ans:2,exp:'The OVER() clause defines the window — the set of rows the function operates on.'},
+      {q:'What does RANK() do when two rows have the same value?',opts:['Assigns random ranks','Assigns the same rank (with a gap after)','Crashes the query','Assigns consecutive ranks'],ans:1,exp:'RANK() gives tied rows the same rank but skips the next rank number — e.g., 1, 2, 2, 4.'},
+      {q:'Which function accesses the value of the PREVIOUS row?',opts:['LEAD()','PREV()','LAG()','BEFORE()'],ans:2,exp:'LAG() returns the value from a previous row within the partition. LEAD() accesses the next row.'},
+      {q:'What does PARTITION BY do inside OVER()?',opts:['Sorts the data','Resets the window calculation per group','Filters rows','Creates a temporary table'],ans:1,exp:'PARTITION BY divides the result into partitions — the window function resets for each partition independently.'}
+    ]
+  },
+  PYTHON_PANDAS: {
+    keywords: ['pandas','dataframe','data cleaning','read csv','dropna','fillna','merge','groupby','data manipulation','python data','clean data'],
+    color: '#3ddc84',
+    title: '🐼 Python — Pandas',
+    content: () => `
+<h2>Python Pandas</h2>
+<p>Pandas is the go-to Python library for structured data manipulation using DataFrames — think of it as a programmable spreadsheet.</p>
+<h3>Loading Data</h3>
+<pre data-lang="python"><code>import pandas as pd
+
+df = pd.read_csv("sales.csv")
+df.head()          # First 5 rows
+df.shape           # (rows, columns)
+df.info()          # Column types &amp; nulls</code></pre>
+<h3>Data Cleaning</h3>
+<pre data-lang="python"><code>df.dropna(inplace=True)                       # Remove rows with nulls
+df.fillna(0, inplace=True)                    # Fill nulls with 0
+df['date'] = pd.to_datetime(df['date'])       # Parse dates
+df['sales'] = df['sales'].astype(float)       # Type conversion
+df.drop_duplicates(inplace=True)              # Remove duplicates</code></pre>
+<h3>Analysis &amp; Grouping</h3>
+<pre data-lang="python"><code>df.groupby('region')['sales'].sum()           # Total sales per region
+df[df['sales'] > 1000]                        # Filter rows
+df.sort_values('sales', ascending=False)      # Sort
+df['revenue'] = df['qty'] * df['price']       # New column</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> Use <code>df.describe()</code> immediately after loading data to get a quick statistical summary of all numeric columns.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Cleaning raw CRM exports — removing duplicates, standardizing date formats, and filling missing revenue values before loading into a dashboard.</div>`,
+    quiz: [
+      {q:'Which Pandas method loads a CSV file into a DataFrame?',opts:['pd.load_csv()','pd.open_csv()','pd.read_csv()','pd.import_csv()'],ans:2,exp:'pd.read_csv() is the standard method to read a CSV file into a Pandas DataFrame.'},
+      {q:'Which method removes rows containing null values?',opts:['df.remove_nulls()','df.dropna()','df.fillna()','df.clean()'],ans:1,exp:'dropna() removes rows (or columns) that contain null/NaN values from the DataFrame.'},
+      {q:'What does df.describe() return?',opts:['Column names only','First 5 rows','Statistical summary of numeric columns','Data types of each column'],ans:2,exp:'describe() returns count, mean, std, min, 25%, 50%, 75%, and max for all numeric columns.'},
+      {q:'Which method groups data and applies aggregation in Pandas?',opts:['df.aggregate()','df.pivot()','df.groupby()','df.cluster()'],ans:2,exp:'groupby() splits data into groups based on a column, then allows aggregate functions like sum(), mean(), count().'},
+      {q:'How do you convert a column to datetime format in Pandas?',opts:['df[col].to_date()','pd.to_datetime(df[col])','df[col].astype(date)','df[col].parse_date()'],ans:1,exp:'pd.to_datetime() parses strings into Pandas Timestamp (datetime) objects, enabling date-based operations.'}
+    ]
+  },
+  PYTHON_NUMPY: {
+    keywords: ['numpy','array','numerical','np.mean','np.array','matrix','computation','numeric','math array'],
+    color: '#3ddc84',
+    title: '🔢 Python — NumPy',
+    content: () => `
+<h2>Python NumPy</h2>
+<p>NumPy (Numerical Python) provides fast, efficient array operations — the foundation of scientific computing in Python.</p>
+<h3>Creating Arrays</h3>
+<pre data-lang="python"><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+matrix = np.array([[1, 2], [3, 4]])
+zeros = np.zeros((3, 3))        # 3x3 matrix of zeros
+ones = np.ones((2, 4))          # 2x4 matrix of ones
+rng = np.arange(0, 10, 2)       # [0, 2, 4, 6, 8]</code></pre>
+<h3>Statistical Operations</h3>
+<pre data-lang="python"><code>arr = np.array([10, 20, 30, 40, 50])
+
+np.mean(arr)    # 30.0
+np.median(arr)  # 30.0
+np.std(arr)     # 14.14
+np.sum(arr)     # 150
+np.max(arr)     # 50
+np.min(arr)     # 10</code></pre>
+<h3>Array Operations</h3>
+<pre data-lang="python"><code>a = np.array([1, 2, 3])
+b = np.array([4, 5, 6])
+
+a + b           # [5, 7, 9]  — element-wise
+a * 2           # [2, 4, 6]  — scalar broadcast
+np.dot(a, b)    # 32         — dot product</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> NumPy operations are 10–100x faster than Python loops. Always prefer vectorized NumPy operations over <code>for</code> loops for numerical computation.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Performing matrix operations in recommendation engines, computing distance metrics in customer segmentation, and building numerical feature arrays for ML models.</div>`,
+    quiz: [
+      {q:'What is the NumPy function to calculate the mean of an array?',opts:['np.average()','np.calc()','np.mean()','np.sum()'],ans:2,exp:'np.mean() computes the arithmetic mean of array elements along a specified axis or the entire array.'},
+      {q:'Which NumPy function creates an array of zeros?',opts:['np.empty()','np.zeros()','np.null()','np.blank()'],ans:1,exp:'np.zeros(shape) creates an array of the given shape filled entirely with 0.0 values.'},
+      {q:'What does np.arange(0, 10, 2) return?',opts:['[0,2,4,6,8]','[0,2,4,6,8,10]','[1,3,5,7,9]','[2,4,6,8,10]'],ans:0,exp:'np.arange(start, stop, step) creates an array from 0 up to (not including) 10, stepping by 2.'},
+      {q:'Why is NumPy faster than plain Python loops?',opts:['It uses a GPU','It skips error checks','It uses vectorized C operations','It runs in parallel'],ans:2,exp:'NumPy operations are implemented in optimized C/Fortran, applying vectorized operations to entire arrays at once.'},
+      {q:'What does np.dot(a, b) compute?',opts:['Element-wise product','Scalar difference','Matrix/dot product','Array concatenation'],ans:2,exp:'np.dot() computes the dot product — sum of element-wise products — of two arrays.'}
+    ]
+  },
+  PYTHON_MATPLOTLIB: {
+    keywords: ['matplotlib','plot','chart','visualize','visualization','graph','trend','line chart','bar chart','plt'],
+    color: '#3ddc84',
+    title: '📈 Python — Matplotlib',
+    content: () => `
+<h2>Python Matplotlib</h2>
+<p>Matplotlib is Python's foundational plotting library — used to generate publication-quality charts for analysis and reporting.</p>
+<h3>Line Chart — Sales Trend</h3>
+<pre data-lang="python"><code>import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 5))
+plt.plot(df['date'], df['sales'], color='steelblue', linewidth=2)
+plt.title("Monthly Sales Trend")
+plt.xlabel("Date")
+plt.ylabel("Sales ($)")
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()</code></pre>
+<h3>Bar Chart — Revenue by Region</h3>
+<pre data-lang="python"><code>regions = ['North', 'South', 'East', 'West']
+revenue = [42000, 38000, 51000, 29000]
+
+plt.bar(regions, revenue, color=['#4f8ef7','#3ddc84','#f7935e','#b27ef7'])
+plt.title("Revenue by Region")
+plt.ylabel("Revenue ($)")
+plt.show()</code></pre>
+<h3>Histogram</h3>
+<pre data-lang="python"><code>plt.hist(df['sales'], bins=20, color='steelblue', edgecolor='white')
+plt.title("Sales Distribution")
+plt.xlabel("Sales")
+plt.show()</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> Use <code>plt.subplot()</code> to create multi-panel dashboards in a single figure. For interactive charts, upgrade to <strong>Plotly</strong> or <strong>Seaborn</strong>.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Generating automated trend reports — monthly sales charts, regional comparisons, and distribution histograms exported as PNG files for stakeholder emails.</div>`,
+    quiz: [
+      {q:'Which function creates a line chart in Matplotlib?',opts:['plt.line()','plt.draw()','plt.plot()','plt.chart()'],ans:2,exp:'plt.plot() draws a line chart. It accepts x and y data arrays and styling parameters.'},
+      {q:'Which function displays the chart on screen?',opts:['plt.render()','plt.display()','plt.output()','plt.show()'],ans:3,exp:'plt.show() renders and displays the current figure. Without it, the plot may not appear in scripts.'},
+      {q:'What does plt.figure(figsize=(10,5)) do?',opts:['Sets the font size','Creates a 10x5 cm figure','Creates a 10x5 inch figure','Adds 10 subplots'],ans:2,exp:'figsize sets the figure width and height in inches. (10, 5) creates a wide landscape chart.'},
+      {q:'Which chart type is best for showing frequency distributions?',opts:['Line chart','Bar chart','Histogram','Scatter plot'],ans:2,exp:'Histograms show how data is distributed across bins — ideal for understanding data spread and skewness.'},
+      {q:'How do you add a title to a Matplotlib chart?',opts:['plt.title()','plt.header()','plt.label()','plt.name()'],ans:0,exp:'plt.title("My Title") adds a title to the top of the current figure.'}
+    ]
+  },
+  STATS_PROBABILITY: {
+    keywords: ['probability','likelihood','churn','predict','p(a)','event','favorable','outcomes','chance','risk'],
+    color: '#b27ef7',
+    title: '🎲 Statistics — Probability',
+    content: () => `
+<h2>Statistics — Probability</h2>
+<p>Probability measures the likelihood of an event occurring. It is the foundation of predictive analytics and data-driven decision making.</p>
+<h3>The Core Formula</h3>
+<pre data-lang="text"><code>P(A) = Favorable Outcomes / Total Outcomes
+
+Example: A bag has 3 red + 7 blue balls.
+P(red) = 3 / 10 = 0.30 = 30%</code></pre>
+<h3>Key Probability Rules</h3>
+<ul>
+  <li><strong>Range:</strong> 0 ≤ P(A) ≤ 1</li>
+  <li><strong>Complement:</strong> P(not A) = 1 − P(A)</li>
+  <li><strong>Addition:</strong> P(A or B) = P(A) + P(B) − P(A and B)</li>
+  <li><strong>Multiplication:</strong> P(A and B) = P(A) × P(B) for independent events</li>
+</ul>
+<h3>Probability in Python</h3>
+<pre data-lang="python"><code>import numpy as np
+
+# Simulate 10,000 coin flips
+flips = np.random.choice(['H', 'T'], size=10000)
+p_heads = np.sum(flips == 'H') / len(flips)
+print(f"P(Heads) ≈ {p_heads:.3f}")  # ≈ 0.500
+
+# Churn probability from data
+churned = df[df['status'] == 'churned'].shape[0]
+total   = df.shape[0]
+p_churn = churned / total
+print(f"Churn rate = {p_churn:.2%}")</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> In analytics, use <strong>conditional probability</strong> — P(churn | segment) — to find which customer segments are most at risk.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Predicting customer churn probability, calculating the likelihood of a product defect, or estimating click-through rates for an ad campaign.</div>`,
+    quiz: [
+      {q:'What is the formula for basic probability?',opts:['Total / Favorable','Favorable / Total','(Favorable × Total) / 100','Total − Favorable'],ans:1,exp:'P(A) = Favorable Outcomes ÷ Total Outcomes. E.g., P(rolling a 3 on a die) = 1/6 ≈ 0.167.'},
+      {q:'What is the probability of a certain event (guaranteed to happen)?',opts:['0','0.5','Between 0 and 1','1'],ans:3,exp:'A certain event has P = 1. An impossible event has P = 0. All probabilities lie in [0, 1].'},
+      {q:'If P(rain) = 0.3, what is P(no rain)?',opts:['0.3','0.7','0.6','1.3'],ans:1,exp:'The complement rule: P(not A) = 1 − P(A) = 1 − 0.3 = 0.7.'},
+      {q:'What type of probability considers prior conditions?',opts:['Joint probability','Marginal probability','Conditional probability','Independent probability'],ans:2,exp:'Conditional probability P(A|B) is the probability of A given that B has already occurred.'},
+      {q:'Which analytics use case directly applies probability theory?',opts:['Dashboard design','Customer churn prediction','Data type conversion','SQL JOIN operations'],ans:1,exp:'Churn prediction models estimate the probability that a customer will stop using a service — a direct application of probability.'}
+    ]
+  },
+  STATS_HYPOTHESIS: {
+    keywords: ['hypothesis','testing','null hypothesis','h0','h1','alpha','significance','p-value','a/b test','ab test','experiment','t-test','reject'],
+    color: '#b27ef7',
+    title: '🧪 Hypothesis Testing',
+    content: () => `
+<h2>Statistics — Hypothesis Testing</h2>
+<p>Hypothesis testing is a formal statistical method to test assumptions and validate data-driven decisions.</p>
+<h3>The 5-Step Process</h3>
+<ul>
+  <li><strong>Step 1:</strong> Define H₀ (Null Hypothesis) — the default assumption (e.g., "new button has no effect")</li>
+  <li><strong>Step 2:</strong> Define H₁ (Alternative Hypothesis) — what you want to prove (e.g., "new button increases clicks")</li>
+  <li><strong>Step 3:</strong> Set significance level α (typically 0.05 = 5% chance of false positive)</li>
+  <li><strong>Step 4:</strong> Compute the test statistic and p-value</li>
+  <li><strong>Step 5:</strong> If p-value &lt; α → Reject H₀. Otherwise, fail to reject H₀.</li>
+</ul>
+<h3>Example — A/B Test in Python</h3>
+<pre data-lang="python"><code>from scipy import stats
+
+# Group A: control  |  Group B: new design
+group_a = [4.2, 4.8, 3.9, 5.1, 4.5]
+group_b = [5.5, 6.1, 5.8, 6.4, 5.9]
+
+t_stat, p_value = stats.ttest_ind(group_a, group_b)
+print(f"T-statistic: {t_stat:.3f}")
+print(f"P-value: {p_value:.4f}")
+
+alpha = 0.05
+if p_value &lt; alpha:
+    print("✅ Reject H₀ — significant difference found!")
+else:
+    print("❌ Fail to reject H₀ — no significant difference.")</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> A low p-value does NOT tell you the effect size. Always report <strong>Cohen's d</strong> or a confidence interval alongside your test result.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Running A/B tests on UI changes — e.g., testing whether a new checkout button design significantly increases conversion rate before rolling it out to all users.</div>`,
+    quiz: [
+      {q:'What does H₀ represent in hypothesis testing?',opts:['The alternative outcome','The expected result','The null (default) assumption','The significance level'],ans:2,exp:'H₀ is the null hypothesis — the default position (e.g., "no effect exists"). We test whether the data gives enough evidence to reject it.'},
+      {q:'What does a p-value of 0.03 mean at α = 0.05?',opts:['Fail to reject H₀','Reject H₀','The test is inconclusive','The data is invalid'],ans:1,exp:'0.03 < 0.05 (alpha), so we reject H₀. There is statistically significant evidence for H₁.'},
+      {q:'What is the typical significance level (α) used in business analytics?',opts:['0.5','0.01','0.05','0.1'],ans:2,exp:'α = 0.05 (5%) is the industry standard. It means we accept a 5% chance of a false positive (Type I error).'},
+      {q:'Which real-world task directly uses hypothesis testing?',opts:['Drawing bar charts','A/B testing a website feature','Loading a CSV file','Creating a SQL JOIN'],ans:1,exp:'A/B testing compares two variants statistically — hypothesis testing determines if the difference is significant or due to chance.'},
+      {q:'If p-value > α, what is the correct conclusion?',opts:['H₀ is proven true','H₁ is accepted','Fail to reject H₀','The experiment failed'],ans:2,exp:'"Fail to reject H₀" is the correct phrasing. We never prove H₀ — we simply lack enough evidence to reject it.'}
+    ]
+  },
+  STATS_DESCRIPTIVE: {
+    keywords: ['descriptive','mean','median','mode','standard deviation','variance','distribution','spread','describe','statistics','average'],
+    color: '#b27ef7',
+    title: '📐 Descriptive Statistics',
+    content: () => `
+<h2>Descriptive Statistics</h2>
+<p>Descriptive statistics summarize and describe the key characteristics of a dataset — the essential first step of any analysis.</p>
+<h3>Core Measures</h3>
+<ul>
+  <li><strong>Mean</strong> — Arithmetic average: sum ÷ count</li>
+  <li><strong>Median</strong> — Middle value when sorted (robust to outliers)</li>
+  <li><strong>Mode</strong> — Most frequently occurring value</li>
+  <li><strong>Standard Deviation</strong> — Average spread from the mean</li>
+  <li><strong>Variance</strong> — Standard Deviation squared</li>
+</ul>
+<h3>In Python with Pandas</h3>
+<pre data-lang="python"><code>import pandas as pd
+
+df = pd.read_csv("sales.csv")
+
+# Full summary in one line
+df.describe()
+
+# Individual measures
+df['revenue'].mean()    # Average revenue
+df['revenue'].median()  # Median revenue
+df['revenue'].std()     # Standard deviation
+df['revenue'].mode()    # Most common revenue value</code></pre>
+<h3>Visualizing Distribution</h3>
+<pre data-lang="python"><code>import matplotlib.pyplot as plt
+
+df['revenue'].hist(bins=30, color='steelblue', edgecolor='white')
+plt.axvline(df['revenue'].mean(),   color='red',    label='Mean')
+plt.axvline(df['revenue'].median(), color='orange', label='Median')
+plt.legend()
+plt.title("Revenue Distribution")
+plt.show()</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> When mean &gt; median, your data is <strong>right-skewed</strong> (outliers pulling average up). Use median for a more honest central tendency in skewed data.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Understanding customer spending distribution — identifying if average order value is skewed by a few large orders, and choosing the right central metric for reporting.</div>`,
+    quiz: [
+      {q:'Which measure is most resistant to outliers?',opts:['Mean','Mode','Variance','Median'],ans:3,exp:'Median is the middle value and is not affected by extreme outliers. Mean is pulled toward outliers.'},
+      {q:'What does a high standard deviation indicate?',opts:['Data is tightly clustered','Data points are spread far from the mean','The mean is very high','There are no outliers'],ans:1,exp:'High standard deviation means data points are widely spread from the mean — high variability in the dataset.'},
+      {q:'Which Pandas function gives a full statistical summary?',opts:['df.summary()','df.stats()','df.describe()','df.profile()'],ans:2,exp:'df.describe() returns count, mean, std, min, 25%, 50%, 75%, and max for all numeric columns.'},
+      {q:'If Mean > Median, what does this indicate about the distribution?',opts:['Left-skewed','Symmetric','Right-skewed','Normal distribution'],ans:2,exp:'When mean > median, large outliers pull the mean right — the distribution is positively (right) skewed.'},
+      {q:'What is the mode of this dataset: [2, 3, 3, 4, 5, 3, 7]?',opts:['3','4','2','3.86'],ans:0,exp:'Mode = the most frequently occurring value. 3 appears three times — more than any other value.'}
+    ]
+  },
+  TOOLS_POWERBI: {
+    keywords: ['power bi','powerbi','dax','power query','dashboard','bi tool','business intelligence','kpi reporting','microsoft','executive'],
+    color: '#f7935e',
+    title: '📊 Power BI',
+    content: () => `
+<h2>Power BI</h2>
+<p>Power BI is Microsoft's business intelligence platform for building interactive dashboards and reports from diverse data sources.</p>
+<h3>Core Components</h3>
+<ul>
+  <li><strong>Power Query</strong> — ETL tool for data transformation (GUI-based, no code needed)</li>
+  <li><strong>Data Model</strong> — Relational model connecting tables with relationships</li>
+  <li><strong>DAX</strong> — Data Analysis Expressions, the formula language for calculations</li>
+  <li><strong>Visuals</strong> — Interactive charts, maps, tables, KPI cards</li>
+  <li><strong>Power BI Service</strong> — Cloud platform for sharing and collaborating</li>
+</ul>
+<h3>Key DAX Formulas</h3>
+<pre data-lang="dax"><code>-- Total Sales
+Total Sales = SUM(Sales[Amount])
+
+-- Year-over-Year Growth
+YoY Growth =
+  DIVIDE(
+    [Total Sales] - CALCULATE([Total Sales], SAMEPERIODLASTYEAR(Dates[Date])),
+    CALCULATE([Total Sales], SAMEPERIODLASTYEAR(Dates[Date]))
+  )
+
+-- Running Total
+Running Total = CALCULATE([Total Sales], FILTER(ALL(Dates), Dates[Date] <= MAX(Dates[Date])))</code></pre>
+<h3>Typical Workflow</h3>
+<ul>
+  <li>1. Connect to data source (Excel, SQL, API)</li>
+  <li>2. Transform in Power Query</li>
+  <li>3. Define relationships in Data Model</li>
+  <li>4. Write DAX measures</li>
+  <li>5. Build visuals on Report canvas</li>
+  <li>6. Publish to Power BI Service</li>
+</ul>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> Use <strong>measures</strong> (not calculated columns) for aggregations — they compute dynamically based on filter context, making dashboards faster and more flexible.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Building executive-level KPI dashboards — monthly revenue, customer acquisition cost, and regional performance — connected live to a SQL Server database.</div>`,
+    quiz: [
+      {q:'What is DAX used for in Power BI?',opts:['Data extraction from SQL','Connecting to databases','Writing calculations and measures','Designing chart layouts'],ans:2,exp:'DAX (Data Analysis Expressions) is the formula language used to create calculated columns, measures, and tables in Power BI.'},
+      {q:'Which Power BI component handles data transformation?',opts:['DAX Studio','Power Query','Report View','Data Model'],ans:1,exp:'Power Query is the ETL layer in Power BI. It connects to data sources and applies transformations before loading.'},
+      {q:'What is the difference between a Measure and a Calculated Column?',opts:['No difference','Measures are dynamic (context-sensitive), columns are static','Columns are faster','Measures are stored on disk'],ans:1,exp:'Measures evaluate dynamically based on the filter context in a visual. Calculated columns are computed once during data refresh.'},
+      {q:'Where do you share and publish Power BI reports for others to view?',opts:['Power Query','Power BI Desktop','Power BI Service','Excel'],ans:2,exp:'Power BI Service (app.powerbi.com) is the cloud platform for publishing, sharing, and collaborating on Power BI reports.'},
+      {q:'Which use case is Power BI most suited for?',opts:['Statistical hypothesis testing','Executive KPI dashboards','Python scripting','Database administration'],ans:1,exp:'Power BI excels at building interactive, self-service business dashboards for executives and business stakeholders.'}
+    ]
+  },
+  TOOLS_TABLEAU: {
+    keywords: ['tableau','data blending','visual storytelling','real time dashboard','tableau vs','viz tool','regional analytics','operational'],
+    color: '#f7935e',
+    title: '📉 Tableau',
+    content: () => `
+<h2>Tableau</h2>
+<p>Tableau is a leading data visualization platform focused on interactive, exploratory analytics and visual storytelling.</p>
+<h3>Core Features</h3>
+<ul>
+  <li><strong>Data Blending</strong> — Combine data from multiple sources without a traditional JOIN</li>
+  <li><strong>Drag-and-Drop</strong> — Build charts without writing code</li>
+  <li><strong>Real-time Dashboards</strong> — Live connections to databases and APIs</li>
+  <li><strong>Calculated Fields</strong> — Custom metrics with Tableau's formula language</li>
+  <li><strong>Visual Storytelling</strong> — Story points guide users through a narrative</li>
+  <li><strong>Tableau Public</strong> — Free platform to share visualizations publicly</li>
+</ul>
+<h3>Tableau vs Power BI — Quick Comparison</h3>
+<ul>
+  <li><strong>Tableau</strong> — Stronger for exploratory analysis, visual design flexibility, large datasets</li>
+  <li><strong>Power BI</strong> — Better Microsoft ecosystem integration, lower cost, strong DAX for complex calculations</li>
+  <li><strong>Tableau</strong> — Preferred by data analysts for ad-hoc exploration</li>
+  <li><strong>Power BI</strong> — Preferred by business teams for recurring KPI reporting</li>
+</ul>
+<h3>Typical Workflow</h3>
+<ul>
+  <li>1. Connect to data source</li>
+  <li>2. Drag dimensions &amp; measures to rows/columns</li>
+  <li>3. Apply filters and aggregations</li>
+  <li>4. Build dashboard by combining sheets</li>
+  <li>5. Add actions for interactivity</li>
+  <li>6. Publish to Tableau Server / Public</li>
+</ul>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> Use <strong>LOD (Level of Detail) expressions</strong> in Tableau to compute aggregations at a different granularity than the view — e.g., <code>FIXED [Region] : SUM([Sales])</code></div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Building regional sales performance maps, supply chain tracking dashboards, and quarterly business review presentations for operations teams.</div>`,
+    quiz: [
+      {q:'What feature allows Tableau to combine data from different sources without a SQL JOIN?',opts:['Data Fusion','Data Blending','Cross-source Query','Multi-connect'],ans:1,exp:'Data Blending links data from different sources by matching on common fields without a traditional database join.'},
+      {q:'What are LOD expressions used for in Tableau?',opts:['Loading data faster','Filtering null values','Computing aggregations at a fixed granularity','Designing chart colors'],ans:2,exp:'LOD (Level of Detail) expressions let you define the granularity of a calculation independently of the view, using FIXED, INCLUDE, or EXCLUDE.'},
+      {q:'Which platform allows free public sharing of Tableau visualizations?',opts:['Tableau Desktop','Tableau Server','Tableau Online','Tableau Public'],ans:3,exp:'Tableau Public is a free platform to create and share interactive visualizations publicly on the web.'},
+      {q:'Compared to Power BI, Tableau is generally considered better for:',opts:['Microsoft Office integration','DAX formula writing','Exploratory visual analysis','Cost effectiveness'],ans:2,exp:'Tableau is widely regarded as the stronger tool for exploratory data analysis and highly flexible visual design.'},
+      {q:'What is a Tableau Story?',opts:['A type of database connection','A guided narrative through multiple visualizations','A SQL query builder','A real-time data feed'],ans:1,exp:'Story Points in Tableau let you create a guided presentation narrative using a sequence of dashboards and charts.'}
+    ]
+  },
+  WORKFLOW: {
+    keywords: ['workflow','pipeline','end to end','end-to-end','full process','analytics process','steps','etl','data pipeline','extract transform load'],
+    color: '#3dc9c9',
+    title: '⚙️ End-to-End Analytics Workflow',
+    content: () => `
+<h2>End-to-End Analytics Workflow</h2>
+<p>A complete data analytics project follows a structured 6-step pipeline from raw data to business insights.</p>
+<h3>The 6-Step Pipeline</h3>
+<ul>
+  <li><strong>Step 1 — SQL Extract</strong><br>Query databases to pull the required raw data. Filter, join, and aggregate at the source.</li>
+  <li><strong>Step 2 — Pandas Clean</strong><br>Load data into Python. Handle nulls, fix types, remove duplicates, standardize formats.</li>
+  <li><strong>Step 3 — NumPy Compute</strong><br>Apply numerical transformations — normalization, distance calculations, matrix operations.</li>
+  <li><strong>Step 4 — Statistics Insight</strong><br>Compute descriptive stats, run hypothesis tests, and calculate probabilities.</li>
+  <li><strong>Step 5 — Matplotlib Visualize</strong><br>Generate charts — trend lines, distribution histograms, regional comparisons.</li>
+  <li><strong>Step 6 — BI Dashboard</strong><br>Load outputs into Power BI or Tableau for interactive executive dashboards.</li>
+</ul>
+<h3>Example — Monthly Sales Report Pipeline</h3>
+<pre data-lang="python"><code># Step 1: SQL → Python
+import pandas as pd, sqlalchemy as sa
+engine = sa.create_engine("postgresql://...")
+df = pd.read_sql("SELECT * FROM sales WHERE month = '2024-03'", engine)
+
+# Step 2: Clean
+df.dropna(inplace=True)
+df['date'] = pd.to_datetime(df['date'])
+
+# Step 3-4: Compute + Stats
+import numpy as np
+monthly_avg = np.mean(df['revenue'])
+print(f"Avg Revenue: ${monthly_avg:,.0f}")
+
+# Step 5: Visualize
+import matplotlib.pyplot as plt
+df.groupby('region')['revenue'].sum().plot(kind='bar')
+plt.title("Revenue by Region — March 2024")
+plt.savefig("report.png")
+
+# Step 6: Output ready for Power BI / Tableau
+df.to_csv("cleaned_sales.csv", index=False)</code></pre>
+<div class="tip-box">🔥 <strong>Pro Tip:</strong> Automate the entire pipeline with <strong>Apache Airflow</strong> or a simple Python <code>schedule</code> job so reports refresh daily without manual intervention.</div>
+<div class="tip-box biz">💼 <strong>Real-world Business Use Case:</strong> Monthly automated sales reporting — SQL pulls fresh data each night, Python cleans and analyses it, and Power BI refreshes the executive dashboard every morning.</div>`,
+    quiz: [
+      {q:'What is the correct order of the analytics workflow?',opts:['Pandas → SQL → NumPy → Stats → Plot → BI','SQL → Pandas → NumPy → Stats → Matplotlib → BI','Stats → SQL → Pandas → BI → Matplotlib → NumPy','BI → Matplotlib → SQL → Pandas → NumPy → Stats'],ans:1,exp:'The correct order: SQL extracts data → Pandas cleans → NumPy computes → Statistics generates insight → Matplotlib visualizes → BI presents.'},
+      {q:'Which tool is responsible for data CLEANING in the workflow?',opts:['SQL','NumPy','Pandas','Matplotlib'],ans:2,exp:'Pandas handles data cleaning — removing nulls, fixing types, deduplication — after SQL extracts the raw data.'},
+      {q:'What is the role of SQL in the analytics pipeline?',opts:['Visualization','Data cleaning','Numerical computation','Data extraction from databases'],ans:3,exp:'SQL is used to query and extract data from relational databases — the first step in the analytics workflow.'},
+      {q:'Which step involves producing charts and trend lines?',opts:['Step 2 — Pandas','Step 3 — NumPy','Step 5 — Matplotlib','Step 6 — BI'],ans:2,exp:'Step 5 uses Matplotlib (or similar libraries) to generate visualizations that communicate analytical findings.'},
+      {q:'What is the final output of the full analytics workflow?',opts:['A cleaned CSV file','A Python script','An interactive BI dashboard','A SQL database'],ans:2,exp:'The final step is publishing to Power BI or Tableau, creating an interactive dashboard for business stakeholders.'}
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════════
+//  RESOURCES from your Resources.md file
+// ═══════════════════════════════════════════════
+const RESOURCES = {
+  python:  {label:'Pandas Docs',  url:'https://pandas.pydata.org/docs/'},
+  sql1:    {label:'SQL Tutorial (ThoughtSpot)', url:'https://www.thoughtspot.com/sql-tutorial'},
+  sql2:    {label:'SQL Zoo',      url:'https://sqlzoo.net/wiki/SQL_Tutorial'},
+  tableau: {label:'Tableau How-To Videos', url:'https://public.tableau.com/app/learn/how-to-videos'},
+  stats:   {label:'StatQuest (YouTube)', url:'https://www.youtube.com/user/joshstarmer'},
+  projects:{label:'Kaggle Datasets', url:'https://www.kaggle.com/datasets'}
+};
+
+// ═══════════════════════════════════════════════
+//  RAG ENGINE
+// ═══════════════════════════════════════════════
+function searchKB(query) {
+  const q = query.toLowerCase();
+  const scores = Object.entries(KB).map(([key, section]) => {
+    let score = 0;
+    section.keywords.forEach(kw => {
+      if (q.includes(kw)) score += kw.split(' ').length * 2;
+    });
+    if (q.includes(key.toLowerCase().replace('_',' '))) score += 10;
+    return { key, section, score };
+  });
+  scores.sort((a,b) => b.score - a.score);
+  return scores.filter(s => s.score > 0).slice(0, 2).map(s => s.section);
+}
+
+function isTestRequest(q) {
+  return /test me|quiz me|take a test|mcq|generate quiz|practice question|test on|quiz on/.test(q.toLowerCase());
+}
+function isResourceRequest(q) {
+  return /resource|link|learn more|reference|website|where to learn|study material/.test(q.toLowerCase());
+}
+function isGreeting(q) {
+  return /^(hi|hello|hey|howdy|good morning|good afternoon|start|begin)[\s!.]*$/.test(q.trim().toLowerCase());
+}
+
+function getTopicSections(topic) {
+  const map = {
+    sql: ['SQL_JOINS','SQL_AGGREGATIONS','SQL_CTE','SQL_WINDOW'],
+    python: ['PYTHON_PANDAS','PYTHON_NUMPY','PYTHON_MATPLOTLIB'],
+    statistics: ['STATS_PROBABILITY','STATS_HYPOTHESIS','STATS_DESCRIPTIVE'],
+    visualization: ['TOOLS_POWERBI','TOOLS_TABLEAU'],
+    workflow: ['WORKFLOW']
+  };
+  return (map[topic] || []).map(k => KB[k]).filter(Boolean);
+}
+
+// ═══════════════════════════════════════════════
+//  RESPONSE GENERATOR
+// ═══════════════════════════════════════════════
+function generateResponse(userQuery) {
+  const q = userQuery.trim().toLowerCase();
+
+  if (isGreeting(q)) {
+    return { type: 'text', html: `<p>👋 <strong>Hello!</strong> Welcome to DataCoach — your AI-powered Analytics Mentor.</p>
+<p>I'm powered by your own <strong>Knowledge Base</strong> (RAG), covering:</p>
+<ul>
+  <li>🔵 <strong>SQL</strong> — Joins, Aggregations, CTEs, Window Functions</li>
+  <li>🟢 <strong>Python</strong> — Pandas, NumPy, Matplotlib</li>
+  <li>🟣 <strong>Statistics</strong> — Probability, Hypothesis Testing, Descriptive Stats</li>
+  <li>🟠 <strong>Viz &amp; BI</strong> — Power BI, Tableau</li>
+  <li>🩵 <strong>Workflow</strong> — End-to-End Analytics Pipeline</li>
+</ul>
+<p>What would you like to do today? <strong>Learn</strong> a topic, <strong>take a quiz</strong>, or <strong>ask a question</strong>?</p>` };
+  }
+
+  if (isResourceRequest(q)) {
+    let html = '<h2>📎 Learning Resources</h2><p>Here are the curated resources from your Knowledge Base:</p>';
+    Object.entries(RESOURCES).forEach(([,r]) => {
+      html += `<a class="res-link" href="${r.url}" target="_blank">🔗 ${r.label}</a>`;
+    });
+    html += `<br><br><div class="tip-box">🔥 <strong>Pro Tip:</strong> Start with <strong>SQLZoo</strong> for interactive SQL practice, then move to <strong>Kaggle Datasets</strong> to apply your skills on real data projects.</div>`;
+    return { type: 'text', html };
+  }
+
+  if (isTestRequest(q)) {
+    const sections = searchKB(q);
+    const targetSection = sections.length > 0 ? sections[0] : getTopicSections(currentTopic)[0];
+    if (!targetSection) return { type: 'text', html: '<p>I couldn\'t find a matching topic for your quiz request. Please specify a topic like: <em>"test me on SQL joins"</em> or <em>"quiz me on pandas"</em>.</p>' };
+    const level = q.includes('advanced') ? 'Advanced' : q.includes('intermediate') ? 'Intermediate' : 'Beginner';
+    return { type: 'quiz', section: targetSection, level };
+  }
+
+  const results = searchKB(q);
+  if (results.length > 0) {
+    return { type: 'text', html: results.map(r => r.content()).join('<hr style="border:none;border-top:1px solid var(--border);margin:20px 0">') };
+  }
+
+  // Topic-level overview
+  const topicSections = getTopicSections(currentTopic);
+  if (topicSections.length > 0) {
+    return {
+      type: 'text',
+      html: `<p>I searched my Knowledge Base for <em>"${userQuery}"</em>. Here's what I found related to <strong>${topicMap[currentTopic].label}</strong>:</p>` +
+            topicSections[0].content() +
+            `<div class="tip-box warn">💡 For more specific answers, try asking about a sub-topic like <em>"SQL JOINs"</em>, <em>"pandas dropna"</em>, or <em>"hypothesis testing steps"</em>.</div>`
+    };
+  }
+
+  return {
+    type: 'text',
+    html: `<p>Based on my current dataset, I don't have specific details on <em>"${userQuery}"</em>. My Knowledge Base covers:</p>
+<ul>
+  <li>SQL (Joins, Aggregations, CTEs, Window Functions)</li>
+  <li>Python (Pandas, NumPy, Matplotlib)</li>
+  <li>Statistics (Probability, Hypothesis Testing, Descriptive Stats)</li>
+  <li>Visualization (Power BI, Tableau)</li>
+  <li>End-to-End Analytics Workflow</li>
+</ul>
+<p>Try one of the topic chips above, or type <strong>"test me on [topic]"</strong> for a quiz.</p>`
+  };
+}
+
+// ═══════════════════════════════════════════════
+//  UI STATE
+// ═══════════════════════════════════════════════
+let currentTopic = 'sql';
+let currentMode  = 'learn';
+let timerInt = null, timerSec = 0;
+let quizState = null;
+
+const topicMap = {
+  sql:          { color:'#4f8ef7', label:'SQL',       chips:['explain sql joins','sql aggregations','cte sql','sql window functions'] },
+  python:       { color:'#3ddc84', label:'Python',    chips:['pandas data cleaning','numpy arrays','matplotlib plot','python data analysis'] },
+  statistics:   { color:'#b27ef7', label:'Statistics',chips:['probability formula','hypothesis testing','descriptive statistics','mean median mode'] },
+  visualization:{ color:'#f7935e', label:'Viz & BI',  chips:['power bi features','tableau vs power bi','dax formula','dashboard design'] },
+  workflow:     { color:'#3dc9c9', label:'Workflow',  chips:['end to end workflow','analytics pipeline','sql to dashboard'] }
+};
+
+function setTopic(el) {
+  document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  currentTopic = el.dataset.topic;
+  const m = topicMap[currentTopic];
+  document.getElementById('theme-pill').style.borderColor = m.color;
+  document.getElementById('theme-pill').style.color = m.color;
+  document.getElementById('theme-pill').textContent = m.label;
+  document.getElementById('tb-title').textContent = `${m.label} — ${getModeLabel()}`;
+  document.getElementById('quick-chips').innerHTML = m.chips.map(c=>`<span class="q-chip" onclick="sendQ('${c}')">${c}</span>`).join('');
+}
+
+function getModeLabel() {
+  return currentMode==='learn'?'Learn & Explore':currentMode==='test'?'Test Mode':'Quick Q&A';
+}
+
+function setMode(m) {
+  currentMode = m;
+  ['learn','test','ask'].forEach(x=>document.getElementById('mode-'+x).classList.toggle('on',x===m));
+  document.getElementById('tb-title').textContent = `${topicMap[currentTopic].label} — ${getModeLabel()}`;
+  document.getElementById('inp').placeholder = m==='test' ? "Type 'test me on [topic]' or choose a difficulty level…" : "Ask a question or click a chip above…";
+}
+
+function hideWelcome() {
+  const w = document.getElementById('welcome');
+  if (w) w.style.display = 'none';
+  const msgs = document.getElementById('msgs');
+  msgs.style.display = 'flex';
+  msgs.style.flexDirection = 'column';
+  msgs.style.gap = '16px';
+}
+
+function quickStart(m) {
+  setMode(m);
+  const queries = { learn:`teach me about ${topicMap[currentTopic].label}`, test:`test me on ${topicMap[currentTopic].label}`, ask:`what is ${topicMap[currentTopic].label}?` };
+  hideWelcome();
+  processInput(queries[m]);
+}
+
+function sendQ(t) { hideWelcome(); document.getElementById('inp').value=t; sendMsg(); }
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
+function autoR(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
+
+function sendMsg() {
+  const inp = document.getElementById('inp');
+  const t = inp.value.trim();
+  if (!t) return;
+  hideWelcome();
+  inp.value = ''; inp.style.height='auto';
+  processInput(t);
+}
+
+function processInput(text) {
+  addMsg('user', text);
+  const tid = addTyping();
+  setTimeout(() => {
+    removeEl(tid);
+    const res = generateResponse(text);
+    if (isTestRequest(text.toLowerCase())) startTimer(10);
+    if (res.type === 'quiz') renderQuiz(res.section, res.level);
+    else addMsg('ai', res.html);
+    scrollBottom();
+  }, 350);
+}
+
+function startTimer(mins) {
+  if(timerInt) clearInterval(timerInt);
+  timerSec = mins*60;
+  const d = document.getElementById('timer');
+  d.style.display='block'; d.style.color='var(--orange)';
+  timerInt = setInterval(()=>{
+    timerSec--;
+    const mm=String(Math.floor(timerSec/60)).padStart(2,'0');
+    const ss=String(timerSec%60).padStart(2,'0');
+    d.textContent=`${mm}:${ss}`;
+    if(timerSec<=60) d.style.color='var(--red)';
+    if(timerSec<=0){clearInterval(timerInt);d.textContent='00:00';addMsg('ai','⏰ <strong>Time\'s up!</strong> See your results above.');}
+  },1000);
+}
+
+function stopTimer() { if(timerInt) clearInterval(timerInt); document.getElementById('timer').style.display='none'; }
+
+function addMsg(role, html) {
+  const area = document.getElementById('msgs');
+  const div  = document.createElement('div');
+  div.className = `msg msg-${role}`;
+  div.innerHTML = `<div class="msg-av">${role==='user'?'U':'AI'}</div><div class="msg-bub"><div class="msg-name">${role==='user'?'You':'DataCoach'}</div><div class="msg-body">${html}</div></div>`;
+  area.appendChild(div);
+  scrollBottom();
+}
+
+function addTyping() {
+  const area = document.getElementById('msgs');
+  const id = 'tp'+Date.now();
+  const div = document.createElement('div');
+  div.id=id; div.className='msg msg-ai';
+  div.innerHTML=`<div class="msg-av">AI</div><div class="msg-bub"><div class="msg-name">DataCoach</div><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>`;
+  area.appendChild(div); scrollBottom(); return id;
+}
+
+function removeEl(id){const e=document.getElementById(id);if(e)e.remove();}
+function scrollBottom(){const a=document.getElementById('chat');a.scrollTop=a.scrollHeight;}
+
+function renderQuiz(section, level) {
+  const qs = [...section.quiz].sort(()=>Math.random()-.5).slice(0,5);
+  quizState = { questions:qs, answers:{}, submitted:false };
+  const area = document.getElementById('msgs');
+  const wrap = document.createElement('div');
+  wrap.className='msg msg-ai';
+  const bub = document.createElement('div');
+  bub.className='msg-bub';
+  bub.innerHTML=`<div class="msg-name">DataCoach — ${section.title} Quiz</div>
+    <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px">⏱ Timer started: 10 minutes &nbsp;|&nbsp; ${level} Level &nbsp;|&nbsp; 5 Questions — Click an option to answer</p>`;
+
+  qs.forEach((q,qi)=>{
+    const qd = document.createElement('div');
+    qd.className='mcq-wrap';
+    qd.innerHTML=`<div class="mcq-q"><span class="mcq-num" style="color:${section.color}">Q${qi+1}</span>${q.q}</div>`;
+    ['A','B','C','D'].forEach((letter,i)=>{
+      const btn = document.createElement('div');
+      btn.className='mcq-opt';
+      btn.dataset.q=qi; btn.dataset.i=i;
+      btn.innerHTML=`<span class="opt-l">${letter}</span><span>${q.opts[i]}</span>`;
+      btn.onclick=()=>pickAnswer(qi,i,btn,q,qd,section.color);
+      qd.appendChild(btn);
+    });
+    const expDiv=document.createElement('div');
+    expDiv.id=`ex${qi}`; expDiv.className='exp-box';
+    expDiv.style.borderLeftColor=section.color;
+    qd.appendChild(expDiv);
+    bub.appendChild(qd);
+  });
+
+  wrap.appendChild(bub);
+  area.appendChild(wrap);
+  scrollBottom();
+}
+
+function pickAnswer(qi,chosen,btn,q,qd,color){
+  if(quizState.answers[qi]!==undefined)return;
+  quizState.answers[qi]=chosen;
+  qd.querySelectorAll('.mcq-opt').forEach((b,i)=>{
+    b.classList.add('locked');
+    if(i===q.ans) b.classList.add('correct');
+    else if(b===btn&&chosen!==q.ans) b.classList.add('wrong');
+  });
+  const ex=document.getElementById(`ex${qi}`);
+  if(ex){ex.style.display='block';ex.innerHTML=`<strong>Explanation:</strong> ${q.exp}`;}
+  if(Object.keys(quizState.answers).length===quizState.questions.length&&!quizState.submitted){
+    quizState.submitted=true; stopTimer(); setTimeout(renderScorecard,400);
+  }
+}
+
+function renderScorecard(){
+  const total   = quizState.questions.length;
+  const correct = quizState.questions.filter((q,i)=>quizState.answers[i]===q.ans).length;
+  const pct     = Math.round(correct/total*100);
+  const col     = pct>=80?'var(--green)':pct>=60?'var(--orange)':'var(--red)';
+  const grade   = pct>=80?'Excellent! 🏆':pct>=60?'Good work! 👍':'Keep practicing! 📚';
+  const nextStep= pct>=80?'🚀 You\'re ready for the next difficulty level!':'💡 Review the topic explanation above and try again.';
+
+  const wrap=document.createElement('div');wrap.className='msg msg-ai';
+  const bub=document.createElement('div');bub.className='msg-bub';
+  bub.innerHTML='<div class="msg-name">DataCoach — Scorecard</div>';
+  const card=document.createElement('div');card.className='score-wrap';
+  card.innerHTML=`
+    <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px">📋 Quiz Results</div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+      <span class="score-num" style="color:${col}">${correct}/${total}</span>
+      <span style="font-size:14px;color:var(--text2)">${grade}</span>
+    </div>
+    <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${col}"></div></div>
+    <div style="font-size:11.5px;color:var(--text2);margin:6px 0 14px">${pct}% accuracy</div>
+    <div style="font-size:12.5px;padding:10px;background:var(--bg4);border-radius:var(--r2);border-left:3px solid ${col}">
+      <strong style="color:var(--text)">Next step:</strong> ${nextStep}
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--text3)">Type <code style="color:var(--teal);background:var(--bg);padding:1px 5px;border-radius:3px">"test me on ${topicMap[currentTopic].label} intermediate"</code> to level up.</div>`;
+  bub.appendChild(card);wrap.appendChild(bub);
+  document.getElementById('msgs').appendChild(wrap);
+  scrollBottom();
+}
+</script>
+</body>
+</html>
