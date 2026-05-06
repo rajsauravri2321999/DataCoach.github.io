@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DataCoach AI — Your Data Analytics Mentor</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body,#root{height:100%;width:100%}
+  body{font-family:'Sora',sans-serif;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .coach{display:flex;height:640px;width:100%;max-width:980px;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);box-shadow:0 40px 80px rgba(0,0,0,0.5);font-size:14px}
+  .sidebar{width:228px;flex-shrink:0;background:#0a0f1e;color:#e2e8f0;display:flex;flex-direction:column;padding:0;border-right:1px solid rgba(255,255,255,0.06)}
+  .sidebar-logo{padding:22px 18px 14px;border-bottom:1px solid rgba(255,255,255,0.07)}
+  .sidebar-logo .title{font-size:16px;font-weight:600;color:#f1f5f9;letter-spacing:-0.4px}
+  .sidebar-logo .sub{font-size:11px;color:#475569;margin-top:3px}
+  .sidebar-section{padding:14px 12px 5px;font-size:10px;font-weight:600;color:#334155;letter-spacing:1.2px;text-transform:uppercase}
+  .topic-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;margin:2px 8px;transition:all 0.15s;border:none;background:transparent;color:#64748b;width:calc(100% - 16px);text-align:left;font-family:'Sora',sans-serif;font-size:13px}
+  .topic-btn:hover{background:rgba(255,255,255,0.05);color:#cbd5e1}
+  .topic-btn.active{color:#f1f5f9}
+  .topic-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sidebar-modes{margin-top:auto;padding:14px 8px;border-top:1px solid rgba(255,255,255,0.07)}
+  .mode-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;margin:2px 0;border:none;background:transparent;color:#64748b;width:100%;text-align:left;font-family:'Sora',sans-serif;font-size:12.5px;transition:all 0.15s}
+  .mode-btn:hover{background:rgba(255,255,255,0.05);color:#cbd5e1}
+  .mode-btn.active-mode{background:rgba(99,102,241,0.2);color:#818cf8}
+  .main{flex:1;display:flex;flex-direction:column;background:#ffffff;overflow:hidden}
+  .topbar{padding:15px 22px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;background:#fff;min-height:58px}
+  .topbar-title{font-weight:600;font-size:15px;color:#0f172a}
+  .topbar-sub{font-size:11.5px;color:#94a3b8;margin-top:1px}
+  .topbar-badge{font-size:11px;padding:4px 12px;border-radius:20px;font-weight:500;white-space:nowrap}
+  .chat-area{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px;background:#f8fafc}
+  .msg{display:flex;gap:10px;align-items:flex-start;animation:fadeUp 0.2s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+  .msg.user{flex-direction:row-reverse}
+  .avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+  .avatar.bot{background:#1e293b;color:#94a3b8}
+  .avatar.user{background:#6366f1;color:#fff}
+  .bubble{max-width:82%;padding:12px 16px;border-radius:14px;font-size:13.5px;line-height:1.7;color:#1e293b}
+  .bubble.bot{background:#fff;border:1px solid #e2e8f0;border-radius:4px 14px 14px 14px}
+  .bubble.user{background:#6366f1;color:#fff;border-radius:14px 4px 14px 14px}
+  .bubble pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px;font-family:'DM Mono',monospace;font-size:12px;overflow-x:auto;margin:10px 0;white-space:pre-wrap;line-height:1.6}
+  .bubble code{font-family:'DM Mono',monospace;background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px;color:#334155}
+  .bubble ul{padding-left:18px;margin:6px 0}
+  .bubble li{margin:4px 0}
+  .bubble h3{font-size:13.5px;font-weight:600;margin:12px 0 5px;color:#0f172a}
+  .bubble h4{font-size:13px;font-weight:600;margin:10px 0 4px;color:#334155}
+  .bubble strong{font-weight:600}
+  .bubble .pro-tip{background:#fef9c3;border-left:3px solid #eab308;padding:9px 12px;border-radius:4px;margin:10px 0;font-size:12.5px;color:#713f12}
+  .bubble .use-case{background:#f0fdf4;border-left:3px solid #22c55e;padding:9px 12px;border-radius:4px;margin:10px 0;font-size:12.5px;color:#14532d}
+  .bubble a{color:#6366f1;text-decoration:none}
+  .bubble a:hover{text-decoration:underline}
+  .quiz-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin:4px 0;max-width:100%}
+  .quiz-q{font-weight:600;font-size:13.5px;color:#0f172a;margin-bottom:12px;line-height:1.5}
+  .quiz-opt{padding:10px 14px;border-radius:9px;border:1px solid #e2e8f0;margin:5px 0;cursor:pointer;font-size:13px;color:#334155;background:#f8fafc;transition:all 0.15s;display:block;width:100%;text-align:left;font-family:'Sora',sans-serif}
+  .quiz-opt:hover:not(:disabled){border-color:#6366f1;background:#eef2ff;color:#4338ca}
+  .quiz-opt.correct{background:#f0fdf4;border-color:#22c55e;color:#166534}
+  .quiz-opt.wrong{background:#fef2f2;border-color:#ef4444;color:#991b1b}
+  .quiz-opt.show-correct{background:#f0fdf4;border-color:#22c55e;color:#166534}
+  .quiz-opt:disabled{cursor:default}
+  .timer-bar{height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;margin:10px 0}
+  .timer-fill{height:100%;transition:width 1s linear;border-radius:2px}
+  .scorecard{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:22px;margin:4px 0}
+  .score-num{font-size:48px;font-weight:600;text-align:center;margin:8px 0 4px;letter-spacing:-2px}
+  .score-label{font-size:13px;color:#64748b;text-align:center}
+  .score-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:12.5px;gap:8px}
+  .input-area{padding:14px 18px;border-top:1px solid #e2e8f0;background:#fff;display:flex;gap:10px;align-items:flex-end}
+  .input-wrap{flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:2px 4px;display:flex;align-items:center;transition:border-color 0.15s}
+  .input-wrap:focus-within{border-color:#a5b4fc}
+  .chat-input{width:100%;border:none;background:transparent;padding:9px 12px;font-family:'Sora',sans-serif;font-size:13.5px;color:#0f172a;resize:none;outline:none;min-height:40px;max-height:110px}
+  .chat-input::placeholder{color:#94a3b8}
+  .send-btn{width:40px;height:40px;border-radius:10px;background:#6366f1;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+  .send-btn:hover{background:#4f46e5;transform:scale(1.03)}
+  .send-btn:disabled{background:#e2e8f0;cursor:default;transform:none}
+  .quick-btns{display:flex;gap:6px;padding:10px 18px 0;flex-wrap:wrap;background:#fff}
+  .quick-btn{font-size:11.5px;padding:5px 12px;border-radius:20px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;cursor:pointer;font-family:'Sora',sans-serif;transition:all 0.15s;white-space:nowrap}
+  .quick-btn:hover{border-color:#6366f1;color:#4338ca;background:#eef2ff}
+  .welcome{padding:28px 24px;max-width:480px}
+  .welcome h2{font-size:24px;font-weight:600;color:#0f172a;margin-bottom:10px;line-height:1.3}
+  .welcome p{font-size:13.5px;color:#64748b;line-height:1.7;margin-bottom:22px}
+  .welcome-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+  .welcome-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;cursor:pointer;transition:all 0.2s;text-align:center}
+  .welcome-card:hover{border-color:#6366f1;background:#eef2ff;transform:translateY(-3px);box-shadow:0 8px 24px rgba(99,102,241,0.12)}
+  .welcome-card .wc-icon{font-size:26px;margin-bottom:8px}
+  .welcome-card .wc-title{font-size:13.5px;font-weight:600;color:#0f172a;margin-bottom:3px}
+  .welcome-card .wc-desc{font-size:11px;color:#94a3b8;line-height:1.4}
+  .typing{display:flex;align-items:center;gap:5px;padding:12px 16px;background:#fff;border:1px solid #e2e8f0;border-radius:4px 14px 14px 14px;width:fit-content}
+  .typing span{width:6px;height:6px;border-radius:50%;background:#cbd5e1;animation:blink 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:0.2s}
+  .typing span:nth-child(3){animation-delay:0.4s}
+  @keyframes blink{0%,80%,100%{opacity:0.25}40%{opacity:1}}
+  .diff-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .diff-btn{padding:8px 18px;border-radius:9px;border:1.5px solid #e2e8f0;background:transparent;cursor:pointer;font-family:'Sora',sans-serif;font-size:13px;font-weight:500;color:#475569;transition:all 0.15s}
+  .diff-btn:hover{border-color:#6366f1;color:#4338ca}
+  .diff-btn.sel{border-color:#6366f1;background:#eef2ff;color:#4338ca}
+  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:6px}
+  .res-link-item{display:block;font-size:11.5px;color:#64748b;padding:5px 3px;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color 0.15s}
+  .res-link-item:hover{color:#818cf8}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useRef,useEffect}=React;
+
+const TOPICS=[
+  {id:'sql',label:'SQL',dot:'#3b82f6',badge:'#dbeafe',badgeText:'#1e40af'},
+  {id:'python',label:'Python',dot:'#22c55e',badge:'#dcfce7',badgeText:'#166534'},
+  {id:'statistics',label:'Statistics',dot:'#a855f7',badge:'#f3e8ff',badgeText:'#7e22ce'},
+  {id:'visualization',label:'Visualization',dot:'#f97316',badge:'#fff7ed',badgeText:'#c2410c'},
+  {id:'general',label:'All Topics',dot:'#6366f1',badge:'#eef2ff',badgeText:'#4338ca'},
+];
+
+const RESOURCES=[
+  {label:'Pandas Documentation',url:'https://pandas.pydata.org/docs/'},
+  {label:'SQL Tutorial – ThoughtSpot',url:'https://www.thoughtspot.com/sql-tutorial'},
+  {label:'SQL Zoo (Interactive)',url:'https://sqlzoo.net/wiki/SQL_Tutorial'},
+  {label:'Tableau How-To Videos',url:'https://public.tableau.com/app/learn/how-to-videos'},
+  {label:'StatQuest by Josh Starmer',url:'https://www.youtube.com/user/joshstarmer'},
+  {label:'Kaggle Datasets',url:'https://www.kaggle.com/datasets'},
+];
+
+const KB=`You are an expert Data Analytics Coach and Mentor AI built for a public analytics learning platform.
+
+## Your Knowledge Base:
+
+### SQL JOINS
+SQL Joins combine rows from multiple tables using a related column.
+Types: INNER JOIN (matching rows only), LEFT JOIN (all left + matched right), RIGHT JOIN (all right + matched left), FULL JOIN (all rows from both).
+Example: SELECT customers.name, orders.amount FROM customers INNER JOIN orders ON customers.id = orders.customer_id;
+Use Case: Merging customer and transaction data for behavioral analysis.
+
+### SQL AGGREGATIONS
+Aggregation functions compute values across multiple rows: COUNT(), SUM(), AVG(), MAX(), MIN()
+Example: SELECT department, AVG(salary) AS avg_salary FROM employees GROUP BY department;
+Use Case: KPI calculations like average revenue per region.
+
+### SQL CTEs (Common Table Expressions)
+CTEs are temporary named result sets within a query.
+Example: WITH SalesCTE AS (SELECT region, SUM(sales) AS total_sales FROM orders GROUP BY region) SELECT * FROM SalesCTE WHERE total_sales > 10000;
+Use Case: Improving readability of complex analytical queries.
+
+### SQL WINDOW FUNCTIONS
+Window functions perform calculations across related rows without collapsing them.
+Example: SELECT name, salary, RANK() OVER (ORDER BY salary DESC) AS rank FROM employees;
+Use Case: Ranking, running totals, moving averages, cohort analysis.
+
+### PYTHON PANDAS
+Pandas is a Python library for structured data manipulation using DataFrames.
+Load data: import pandas as pd; df = pd.read_csv("sales.csv")
+Clean: df.dropna(inplace=True); df['date'] = pd.to_datetime(df['date']); df['sales'] = df['sales'].astype(float)
+Use Case: Cleaning and preparing raw datasets before analysis.
+
+### PYTHON NUMPY
+NumPy provides numerical operations on arrays.
+Example: import numpy as np; arr = np.array([1,2,3,4]); np.mean(arr)
+Use Case: Efficient numerical computation in analytics pipelines.
+
+### PYTHON MATPLOTLIB
+Matplotlib is used for data visualization in Python.
+Example: import matplotlib.pyplot as plt; plt.plot(df['date'], df['sales']); plt.title("Sales Trend"); plt.show()
+Use Case: Generating trend charts for reporting.
+
+### STATISTICS – PROBABILITY
+P(A) = Favorable Outcomes / Total Outcomes
+Use Case: Predicting customer churn probability.
+
+### STATISTICS – HYPOTHESIS TESTING
+Steps: 1) Define H0 (null hypothesis) 2) Define H1 (alternative hypothesis) 3) Set significance level (alpha) 4) Compute test statistic 5) Accept or reject H0
+Use Case: A/B testing and experiment validation.
+
+### STATISTICS – DESCRIPTIVE STATISTICS
+Summarize datasets using: Mean, Median, Mode, Standard Deviation.
+Python: df.describe()
+Use Case: Understanding data distribution and spread.
+
+### TOOLS – POWER BI
+Power BI features: Data transformation via Power Query, DAX calculations, Interactive dashboards.
+Use Case: Executive-level KPI reporting.
+
+### TOOLS – TABLEAU
+Tableau features: Data blending, real-time dashboards, visual storytelling.
+Use Case: Regional and operational analytics dashboards.
+
+### END-TO-END ANALYTICS WORKFLOW
+1. SQL extracts data from databases
+2. Pandas cleans and transforms data
+3. NumPy performs numerical analysis
+4. Statistics generates insights
+5. Matplotlib visualizes trends
+6. Power BI/Tableau present dashboards
+
+## Behavior Rules:
+- Answer concisely and clearly using markdown-like formatting
+- Use **bold** for emphasis, backtick for inline code, triple backticks for code blocks
+- Always include a real-world business use case when explaining a concept
+- Add a Pro Tip for best practices when relevant, prefixed with "💡 Pro Tip:"
+- Add use cases prefixed with "🏢 Real-world Use Case:"
+- For quiz generation: produce exactly the number of MCQs requested, each with A/B/C/D options, and end with ANSWERS: 1-X,2-X,... (no extra text after answers)
+- For post-quiz feedback: be warm, specific, and actionable
+- If a topic is not in your knowledge base, say "Based on my current dataset, I don't have specific details on this, but here is a general overview..." then answer from general knowledge`;
+
+function parseMD(text){
+  if(!text)return'';
+  return text
+    .replace(/```[\w]*\n?([\s\S]*?)```/g,(_,c)=>`<pre>${escH(c.trim())}</pre>`)
+    .replace(/`([^`]+)`/g,(_,c)=>`<code>${escH(c)}</code>`)
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*\n]+)\*/g,'<em>$1</em>')
+    .replace(/^### (.+)$/gm,'<h4>$1</h4>')
+    .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+    .replace(/💡 Pro Tip:([\s\S]*?)(?=\n\n|\n[#🏢]|$)/g,'<div class="pro-tip">💡 <strong>Pro Tip:</strong>$1</div>')
+    .replace(/🏢 Real-world Use Case:([\s\S]*?)(?=\n\n|\n[#💡]|$)/g,'<div class="use-case">🏢 <strong>Real-world Use Case:</strong>$1</div>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>')
+    .replace(/^- (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/s,(m)=>`<ul>${m}</ul>`)
+    .replace(/\n{2,}/g,'<br/><br/>')
+    .replace(/\n/g,'<br/>');
+}
+function escH(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function parseQuiz(text){
+  const answerMap={};
+  const ansMatch=text.match(/ANSWERS?:\s*([1-9]-[A-D](?:,[1-9]-[A-D])*)/i);
+  if(ansMatch){
+    ansMatch[1].split(',').forEach(a=>{
+      const[num,letter]=a.trim().split('-');
+      answerMap[parseInt(num)]=letter;
+    });
+  }
+  const blocks=text.split(/(?=\d+\.)/).filter(b=>/^\d+\./.test(b.trim()));
+  const questions=[];
+  blocks.forEach((block,i)=>{
+    const lines=block.trim().split('\n');
+    const qLine=lines[0].replace(/^\d+\.\s*/,'').trim();
+    const opts={};
+    lines.slice(1).forEach(l=>{
+      const m=l.match(/^([A-D])[\.\)]\s+(.+)/);
+      if(m)opts[m[1]]=m[2].trim();
+    });
+    if(qLine&&Object.keys(opts).length>=2){
+      questions.push({q:qLine,opts,answer:answerMap[i+1]||null,num:i+1});
+    }
+  });
+  return questions;
+}
+
+function QuizWidget({questions,onDone}){
+  const[answers,setAnswers]=useState({});
+  const[revealed,setRevealed]=useState(false);
+  const[timeLeft,setTimeLeft]=useState(600);
+  useEffect(()=>{
+    if(revealed)return;
+    const t=setInterval(()=>setTimeLeft(p=>{if(p<=1){setRevealed(true);return 0;}return p-1;}),1000);
+    return()=>clearInterval(t);
+  },[revealed]);
+  const mins=Math.floor(timeLeft/60);
+  const secs=timeLeft%60;
+  const pick=(qi,opt)=>{if(revealed||answers[qi]!==undefined)return;setAnswers(p=>({...p,[qi]:opt}));};
+  const submit=()=>setRevealed(true);
+  const allAnswered=Object.keys(answers).length===questions.length;
+  useEffect(()=>{if(revealed&&onDone){const s=questions.reduce((sc,q)=>sc+(answers[q.num]===q.answer?1:0),0);onDone(s,questions.length,answers,questions);}},[revealed]);
+  return(
+    <div className="quiz-card">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+        <span style={{fontSize:12,fontWeight:600,color:'#475569'}}>⏱ {mins}:{String(secs).padStart(2,'0')} remaining</span>
+        <span style={{fontSize:12,color:'#94a3b8'}}>{Object.keys(answers).length}/{questions.length} answered</span>
+      </div>
+      <div className="timer-bar">
+        <div className="timer-fill" style={{width:`${(timeLeft/600)*100}%`,background:timeLeft<120?'#ef4444':'#6366f1'}}/>
+      </div>
+      {questions.map(q=>{
+        const chosen=answers[q.num];
+        return(
+          <div key={q.num} style={{marginBottom:18}}>
+            <div className="quiz-q">{q.num}. {q.q}</div>
+            {Object.entries(q.opts).map(([k,v])=>{
+              let cls='quiz-opt';
+              if(revealed){
+                if(k===q.answer)cls+=' show-correct';
+                else if(k===chosen)cls+=' wrong';
+              }else if(chosen===k)cls+=' correct';
+              return(<button key={k} className={cls} disabled={revealed||chosen!==undefined} onClick={()=>pick(q.num,k)}><strong>{k}.</strong> {v}</button>);
+            })}
+          </div>
+        );
+      })}
+      {!revealed&&(
+        <button onClick={submit} disabled={!allAnswered} style={{width:'100%',padding:'11px',background:allAnswered?'#6366f1':'#e2e8f0',color:allAnswered?'#fff':'#94a3b8',border:'none',borderRadius:9,cursor:allAnswered?'pointer':'default',fontFamily:'Sora,sans-serif',fontSize:13.5,fontWeight:600,marginTop:6,transition:'all 0.15s'}}>
+          {allAnswered?'Submit Quiz ✓':'Answer all questions to submit'}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ScoreCard({score,total,questions,answers}){
+  const pct=Math.round((score/total)*100);
+  const emoji=pct>=80?'🏆':pct>=60?'👍':pct>=40?'📚':'💪';
+  const msg=pct>=80?'Outstanding performance!':pct>=60?'Good job — keep practicing!':pct>=40?'Solid effort, room to grow.':'Keep at it — every expert started here!';
+  const color=pct>=80?'#16a34a':pct>=60?'#6366f1':pct>=40?'#f59e0b':'#ef4444';
+  const wrong=questions.filter(q=>answers[q.num]!==q.answer);
+  return(
+    <div className="scorecard">
+      <div className="score-num" style={{color}}>{emoji} {score}/{total}</div>
+      <div className="score-label">{pct}% — {msg}</div>
+      {wrong.length>0&&(
+        <div style={{marginTop:18}}>
+          <div style={{fontSize:12,fontWeight:600,color:'#475569',marginBottom:8,textTransform:'uppercase',letterSpacing:'0.5px'}}>Review these:</div>
+          {wrong.map(q=>(
+            <div key={q.num} className="score-row">
+              <span style={{color:'#ef4444',fontWeight:600,minWidth:28}}>Q{q.num}</span>
+              <span style={{flex:1,color:'#334155',fontSize:12}}>{q.q.length>55?q.q.substring(0,55)+'…':q.q}</span>
+              <span style={{color:'#22c55e',fontSize:11,fontWeight:600,minWidth:50,textAlign:'right'}}>Ans: {q.answer}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{marginTop:14,padding:'12px 14px',background:'#eef2ff',borderRadius:10}}>
+        <div style={{fontSize:12,fontWeight:600,color:'#4338ca',marginBottom:4}}>📋 Personalized next step</div>
+        <div style={{fontSize:12.5,color:'#4338ca',lineHeight:1.6}}>
+          {wrong.length===0?'Perfect! Challenge yourself with a harder difficulty level.':wrong.length<=2?'Great foundation! Review the missed topics above, then attempt Advanced level.':'Focus on the weak areas above. Re-read the concept, practice with examples, then retake.'}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const[msgs,setMsgs]=useState([]);
+  const[input,setInput]=useState('');
+  const[loading,setLoading]=useState(false);
+  const[topic,setTopic]=useState('general');
+  const[mode,setMode]=useState('welcome');
+  const[diff,setDiff]=useState('Intermediate');
+  const[history,setHistory]=useState([]);
+  const chatRef=useRef();
+  const inputRef=useRef();
+
+  useEffect(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},[msgs,loading]);
+  const curTopic=TOPICS.find(t=>t.id===topic)||TOPICS[4];
+
+  async function callAPI(userMsg){
+    const newHistory=[...history,{role:'user',content:userMsg}];
+    setHistory(newHistory);
+    setLoading(true);
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:KB,messages:newHistory})
+      });
+      const data=await res.json();
+      const reply=data.content?.find(b=>b.type==='text')?.text||'Sorry, I could not generate a response.';
+      setHistory(h=>[...h,{role:'assistant',content:reply}]);
+      return reply;
+    }catch(e){return'Connection error. Please check your internet and try again.';}
+    finally{setLoading(false);}
+  }
+
+  async function send(text){
+    const msg=(text||input).trim();
+    if(!msg||loading)return;
+    setInput('');
+    setMsgs(m=>[...m,{type:'user',text:msg}]);
+    const reply=await callAPI(msg);
+    const qs=parseQuiz(reply);
+    if(qs.length>=3){
+      setMsgs(m=>[...m,{type:'bot',text:`**Quiz ready!** 🎯 You have 10 minutes. Good luck!`,quiz:qs,quizId:Date.now()}]);
+    }else{
+      setMsgs(m=>[...m,{type:'bot',text:reply}]);
+    }
+  }
+
+  function startMode(m){
+    setMode(m);setMsgs([]);setHistory([]);
+    if(m==='learn'){
+      setMsgs([{type:'bot',text:`**Welcome to Learn Mode!** 📖\n\nI'm your personal Data Analytics Coach. Ask me anything about:\n\n- **SQL** — Joins, CTEs, Window Functions, Aggregations\n- **Python** — Pandas, NumPy, Matplotlib\n- **Statistics** — Hypothesis Testing, Probability, Descriptive Stats\n- **Tools** — Power BI, Tableau\n- **Workflows** — End-to-end analytics pipelines\n\nWhat would you like to explore today?`}]);
+    }else if(m==='test'){
+      setMsgs([{type:'bot',text:`**Welcome to Test Mode!** ⚡\n\nLet's assess your analytics knowledge! Select your difficulty and click **Start Quiz** — I'll generate a timed 5-question quiz on **${curTopic.label}**.\n\nChange the topic any time using the sidebar.`,isDiffSelect:true}]);
+    }else if(m==='ask'){
+      setMsgs([{type:'bot',text:`**Ask Me Anything!** 💬\n\nGot a specific question, concept to clarify, or code to debug? Type it in and I'll give you a clear, practical answer with real-world context.\n\n*Try: "Explain p-value in plain English" or "What's the difference between RANK() and DENSE_RANK()?"*`}]);
+    }
+  }
+
+  async function startQuiz(){
+    const topicLabel=curTopic.label==='All Topics'?'mixed data analytics (SQL, Python, Statistics, and BI Tools)':curTopic.label;
+    const prompt=`Generate a ${diff} level quiz with exactly 5 multiple choice questions on ${topicLabel}. Number each question. Give 4 options (A/B/C/D). End with ANSWERS: 1-X,2-X,3-X,4-X,5-X on the last line.`;
+    setMsgs(m=>[...m,{type:'user',text:`Start ${diff} ${topicLabel} quiz`}]);
+    const reply=await callAPI(prompt);
+    const qs=parseQuiz(reply);
+    if(qs.length>=3){
+      setMsgs(m=>[...m,{type:'bot',text:`**${diff} Quiz — ${curTopic.label}**\nTimer: 10 minutes • ${qs.length} questions`,quiz:qs,quizId:Date.now()}]);
+    }else{
+      setMsgs(m=>[...m,{type:'bot',text:reply}]);
+    }
+  }
+
+  const QUICK={
+    learn:['Explain SQL Joins with example','How do Window Functions work?','Pandas data cleaning steps','Explain hypothesis testing simply','What is the analytics workflow?'],
+    ask:['Difference between RANK() and DENSE_RANK()','What is p-value in plain English?','Pandas vs NumPy — when to use which?','Power BI vs Tableau comparison','How does GROUP BY work?'],
+  };
+
+  return(
+    <div className="coach">
+      <div className="sidebar">
+        <div className="sidebar-logo">
+          <div className="title">📊 DataCoach AI</div>
+          <div className="sub">Your analytics mentor</div>
+        </div>
+        <div className="sidebar-section">Topics</div>
+        {TOPICS.map(t=>(
+          <button key={t.id} className={`topic-btn${topic===t.id?' active':''}`} onClick={()=>setTopic(t.id)}
+            style={topic===t.id?{background:`${t.dot}20`,color:'#f1f5f9'}:{}}>
+            <span className="topic-dot" style={{background:t.dot}}/>
+            {t.label}
+          </button>
+        ))}
+        <div className="sidebar-section">Mode</div>
+        <div style={{padding:'0 8px'}}>
+          {[{id:'learn',icon:'📖',label:'Learn'},{id:'test',icon:'⚡',label:'Test Me'},{id:'ask',icon:'💬',label:'Ask'}].map(m=>(
+            <button key={m.id} className={`mode-btn${mode===m.id?' active-mode':''}`} onClick={()=>startMode(m.id)}>
+              <span style={{fontSize:15}}>{m.icon}</span>{m.label}
+            </button>
+          ))}
+        </div>
+        <div className="sidebar-modes">
+          <div style={{fontSize:10,color:'#334155',marginBottom:10,fontWeight:600,letterSpacing:'1px',textTransform:'uppercase'}}>Resources</div>
+          {RESOURCES.map((r,i)=>(
+            <a key={i} href={r.url} target="_blank" className="res-link-item" title={r.label}>{r.label}</a>
+          ))}
+        </div>
+      </div>
+
+      <div className="main">
+        <div className="topbar">
+          <div>
+            <div className="topbar-title">
+              {mode==='welcome'?'Data Analytics Coach':mode==='learn'?'Learn Mode':mode==='test'?'Test Mode':'Ask Anything'}
+            </div>
+            <div className="topbar-sub">
+              {mode==='welcome'?'AI-powered analytics mentor':'Topic: '+curTopic.label+(mode==='test'?' • '+diff:'')}
+            </div>
+          </div>
+          <span className="topbar-badge" style={{background:curTopic.badge,color:curTopic.badgeText}}>{curTopic.label}</span>
+        </div>
+
+        {mode==='welcome'?(
+          <div className="chat-area" style={{justifyContent:'center',alignItems:'flex-start'}}>
+            <div className="welcome">
+              <h2>Hello! 👋 Welcome to DataCoach AI</h2>
+              <p>Your AI-powered data analytics mentor. Learn concepts, take timed quizzes, and get instant answers — all powered by Claude AI with a curated analytics knowledge base.</p>
+              <div className="welcome-cards">
+                {[{id:'learn',icon:'📖',title:'Learn',desc:'Study with AI explanations & examples'},{id:'test',icon:'⚡',title:'Test Me',desc:'Timed MCQ quizzes with scoring'},{id:'ask',icon:'💬',title:'Ask',desc:'Get instant answers to any question'}].map(c=>(
+                  <div key={c.id} className="welcome-card" onClick={()=>startMode(c.id)}>
+                    <div className="wc-icon">{c.icon}</div>
+                    <div className="wc-title">{c.title}</div>
+                    <div className="wc-desc">{c.desc}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{fontSize:12,color:'#94a3b8',marginBottom:10}}>Quick start:</div>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                {['Explain SQL Window Functions','How do I clean data in Pandas?','What is A/B testing?','Tableau vs Power BI?'].map(q=>(
+                  <button key={q} className="quick-btn" onClick={()=>{startMode('ask');setTimeout(()=>send(q),80)}}>{q}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ):(
+          <>
+            <div className="chat-area" ref={chatRef}>
+              {msgs.map((m,i)=>(
+                <div key={i} className={`msg ${m.type}`}>
+                  <div className={`avatar ${m.type}`}>{m.type==='bot'?'AI':'U'}</div>
+                  <div className={`bubble ${m.type}`}>
+                    {m.type==='bot'?(
+                      <>
+                        <div dangerouslySetInnerHTML={{__html:parseMD(m.text)}}/>
+                        {m.isDiffSelect&&(
+                          <div style={{marginTop:14}}>
+                            <div style={{fontSize:12,color:'#64748b',marginBottom:6}}>Select difficulty:</div>
+                            <div className="diff-btns">
+                              {['Beginner','Intermediate','Advanced'].map(d=>(
+                                <button key={d} className={`diff-btn${diff===d?' sel':''}`} onClick={()=>setDiff(d)}>{d}</button>
+                              ))}
+                            </div>
+                            <button onClick={startQuiz} disabled={loading} style={{marginTop:14,padding:'10px 22px',background:'#6366f1',color:'#fff',border:'none',borderRadius:9,cursor:'pointer',fontFamily:'Sora,sans-serif',fontSize:13.5,fontWeight:600,transition:'all 0.15s'}}>
+                              {loading?'Generating…':'Start Quiz ↗'}
+                            </button>
+                          </div>
+                        )}
+                        {m.quiz&&!m.scoreShown&&(
+                          <QuizWidget questions={m.quiz} onDone={(score,total,answers,questions)=>{
+                            setMsgs(prev=>prev.map((msg,idx)=>idx===i?{...msg,scoreShown:true}:msg));
+                            setMsgs(prev=>[...prev,{type:'bot',text:'',isScore:true,score,total,qs:questions,answers}]);
+                            callAPI(`The user just scored ${score} out of ${total} on a ${diff} ${curTopic.label} quiz. Give warm, specific 2-sentence feedback and one concrete next study action.`).then(r=>{
+                              setMsgs(prev=>[...prev,{type:'bot',text:r}]);
+                            });
+                          }}/>
+                        )}
+                        {m.isScore&&<ScoreCard score={m.score} total={m.total} questions={m.qs} answers={m.answers}/>}
+                      </>
+                    ):(
+                      <span>{m.text}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {loading&&(
+                <div className="msg bot">
+                  <div className="avatar bot">AI</div>
+                  <div className="typing"><span/><span/><span/></div>
+                </div>
+              )}
+            </div>
+
+            {(QUICK[mode]||[]).length>0&&msgs.length<=1&&(
+              <div className="quick-btns">
+                {(QUICK[mode]).map(q=>(
+                  <button key={q} className="quick-btn" onClick={()=>send(q)}>{q}</button>
+                ))}
+              </div>
+            )}
+
+            {mode!=='test'&&(
+              <div className="input-area">
+                <div className="input-wrap">
+                  <textarea ref={inputRef} className="chat-input" value={input}
+                    placeholder={mode==='learn'?'Ask about any analytics concept…':'Ask any data analytics question…'}
+                    rows={1} onChange={e=>setInput(e.target.value)}
+                    onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}}/>
+                </div>
+                <button className="send-btn" disabled={!input.trim()||loading} onClick={()=>send()}>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                  </svg>
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
